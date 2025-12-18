@@ -1,0 +1,778 @@
+
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { GamePhase, GameMode, Language, HintsState } from './types';
+import { SAMPLE_QUESTIONS, SOUNDS } from './constants';
+import { playBGM, playSFX, stopBGM, stopSFX, stopAll, setGlobalMute } from './utils/audioManager';
+import { Button } from './components/Button';
+import { OptionCard } from './components/OptionCard';
+import { Users, User, Volume2, VolumeX, Trophy, ArrowRight, ArrowLeft, RefreshCw, XCircle, LayoutGrid, AlertCircle, Play, Globe, BarChart3, Phone, Scissors, ShieldCheck, Timer } from 'lucide-react';
+
+interface QuestionHistory {
+  wrong: string[];
+  isCorrect: boolean;
+  attempts: number;
+  fiftyFiftyUsedForThis: string[]; // Options hidden by 50/50
+}
+
+const translations = {
+  en: {
+    title: "Family Quiz",
+    player1: "Player 1",
+    player2: "Player 2",
+    name: "Name",
+    initialScore: "Initial Score",
+    startGame: "Start Game",
+    chooseCategory: "Choose Your Category",
+    startInOrder: "Start Game in Order",
+    showScore: "Show Current Score",
+    backToSetup: "Back to Setup",
+    newCategory: "New Category",
+    clickToContinue: "Click to continue",
+    gameOver: "Game Over!",
+    newGame: "New Game",
+    turnFor: "Turn for",
+    pts: "pts",
+    correct: "Correct!",
+    nextQuestion: "Next Question",
+    categories: "Categories",
+    quitTitle: "Quit Game?",
+    quitToMenu: "Quit to Menu?",
+    quitMessage: "This will reset all current scores and progress.",
+    quitMessageLost: "Current game state will be lost.",
+    goCategories: "Go to Categories?",
+    progressSaved: "Current progress is saved.",
+    currentScoreboard: "Current Scoreboard",
+    continue: "Continue",
+    completed: "Completed",
+    startQuiz: "Start Quiz",
+    cancel: "Cancel",
+    yes: "Yes",
+    startTimer: "Start Call",
+    callTimerTitle: "Call a Friend",
+    freeMistakeActive: "Free Mistake Active!",
+    confirmHintTitle: "Use Hint?",
+    confirmHintMessage: "Are you sure you want to use the {hint} hint?",
+    hint5050: "50/50",
+    hintCall: "Call a Friend",
+    hintMistake: "Free Mistake",
+    done: "Done"
+  },
+  ru: {
+    title: "Семейная Викторина",
+    player1: "Игрок 1",
+    player2: "Игрок 2",
+    name: "Имя",
+    initialScore: "Начальный счет",
+    startGame: "Начать игру",
+    chooseCategory: "Выберите категорию",
+    startInOrder: "Начать по порядку",
+    showScore: "Показать текущий счет",
+    backToSetup: "Вернуться в начало",
+    newCategory: "Новая категория",
+    clickToContinue: "Нажмите, чтобы продолжить",
+    gameOver: "Игра окончена!",
+    newGame: "Новая игра",
+    turnFor: "Ход игрока",
+    pts: "очк.",
+    correct: "Верно!",
+    nextQuestion: "Следующий вопрос",
+    categories: "Категории",
+    quitTitle: "Выйти из игры?",
+    quitToMenu: "В главное меню?",
+    quitMessage: "Это сбросит текущие очки и прогресс.",
+    quitMessageLost: "Текущее состояние игры будет потеряно.",
+    goCategories: "К категориям?",
+    progressSaved: "Текущий прогресс сохранен.",
+    currentScoreboard: "Текущий счет",
+    continue: "Продолжить",
+    completed: "Пройдено",
+    startQuiz: "Начать",
+    cancel: "Отмена",
+    yes: "Да",
+    startTimer: "Начать звонок",
+    callTimerTitle: "Звонок другу",
+    freeMistakeActive: "Право на ошибку активно!",
+    confirmHintTitle: "Использовать подсказку?",
+    confirmHintMessage: "Вы уверены, что хотите использовать подсказку {hint}?",
+    hint5050: "50/50",
+    hintCall: "Звонок другу",
+    hintMistake: "Право на ошибку",
+    done: "Готово"
+  }
+};
+
+const initialHints: HintsState = {
+  fiftyFifty: true,
+  callFriend: true,
+  freeMistake: true
+};
+
+export default function App() {
+  // --- Global State ---
+  const [lang, setLang] = useState<Language>('en');
+  const [phase, setPhase] = useState<GamePhase>(GamePhase.SETUP);
+  const [mode, setMode] = useState<GameMode>(GameMode.SINGLE_PLAYER);
+  const [isMuted, setIsMuted] = useState(false);
+  const t = translations[lang];
+  
+  // Players
+  const [team1Name, setTeam1Name] = useState("Team 1");
+  const [team2Name, setTeam2Name] = useState("Team 2");
+  const [team1StartScore, setTeam1StartScore] = useState(0);
+  const [team2StartScore, setTeam2StartScore] = useState(0);
+  const [scores, setScores] = useState<{ p1: number, p2: number }>({ p1: 0, p2: 0 });
+  
+  // Hints Persistence
+  const [playerHints, setPlayerHints] = useState<{ p1: HintsState, p2: HintsState }>({
+    p1: { ...initialHints },
+    p2: { ...initialHints }
+  });
+
+  // Current Question Hints State
+  const [freeMistakeActive, setFreeMistakeActive] = useState(false);
+  const [callFriendActive, setCallFriendActive] = useState(false);
+  const [callTimerValue, setCallTimerValue] = useState(32);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [pendingHint, setPendingHint] = useState<'fiftyFifty' | 'callFriend' | 'freeMistake' | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Confirmation Modals
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+  const [showTopicsConfirm, setShowTopicsConfirm] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+
+  // Game Progress
+  const questions = useMemo(() => {
+    const topicOrder: string[] = [];
+    SAMPLE_QUESTIONS.forEach(q => {
+      if (!topicOrder.includes(q.topic)) topicOrder.push(q.topic);
+    });
+    return [...SAMPLE_QUESTIONS].sort((a, b) => {
+      if (a.topic === b.topic) return a.id - b.id;
+      return topicOrder.indexOf(a.topic) - topicOrder.indexOf(b.topic);
+    });
+  }, []);
+
+  const availableTopics = useMemo(() => {
+    const topicOrder: string[] = [];
+    const topicMap = new Map<string, string>();
+    questions.forEach(q => {
+      if (!topicMap.has(q.topic)) {
+        topicMap.set(q.topic, q.topicName);
+        topicOrder.push(q.topic);
+      }
+    });
+    return topicOrder.map(id => ({ id, name: topicMap.get(id)! }));
+  }, [questions]);
+
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [scoredIndices, setScoredIndices] = useState<number[]>([]);
+  const [history, setHistory] = useState<Record<number, QuestionHistory>>({});
+
+  const currentHistory = useMemo(() => 
+    history[currentQIndex] || { wrong: [], isCorrect: false, attempts: 0, fiftyFiftyUsedForThis: [] }
+  , [history, currentQIndex]);
+
+  const wrongAnswers = currentHistory.wrong;
+  const hiddenBy5050 = currentHistory.fiftyFiftyUsedForThis;
+  const isCorrect = currentHistory.isCorrect;
+  const attemptsCount = currentHistory.attempts;
+  const currentQuestion = questions[currentQIndex];
+
+  const isTopicCompleted = (topicId: string) => {
+    const topicQuestionsIndices = questions
+      .map((q, idx) => (q.topic === topicId ? idx : -1))
+      .filter(idx => idx !== -1);
+    if (topicQuestionsIndices.length === 0) return false;
+    return topicQuestionsIndices.every(idx => history[idx]?.isCorrect);
+  };
+
+  useEffect(() => {
+    setGlobalMute(isMuted);
+  }, [isMuted]);
+
+  // Turn Logic: Question index 0 is "Question 1" (Odd)
+  const getActiveTeam = () => {
+    if (mode === GameMode.SINGLE_PLAYER) return 1;
+    const isOddQuestion = (currentQIndex + 1) % 2 !== 0;
+    if (isOddQuestion) {
+      if (attemptsCount === 0) return 1;
+      if (attemptsCount === 1) return 2;
+      return 1;
+    } else {
+      if (attemptsCount === 0) return 2;
+      if (attemptsCount === 1) return 1;
+      return 2;
+    }
+  };
+
+  const calculatePoints = () => {
+    if (attemptsCount === 0) return 3;
+    if (attemptsCount === 1) return 2;
+    if (attemptsCount === 2) return 1;
+    return 0;
+  };
+
+  // --- Hint Confirmation Actions ---
+  const requestUseHint = (hintType: 'fiftyFifty' | 'callFriend' | 'freeMistake') => {
+    if (phase !== GamePhase.QUESTION || isCorrect) return;
+    setPendingHint(hintType);
+  };
+
+  const confirmHint = () => {
+    if (!pendingHint) return;
+    if (pendingHint === 'fiftyFifty') execute5050();
+    else if (pendingHint === 'callFriend') executeCallFriend();
+    else if (pendingHint === 'freeMistake') executeFreeMistake();
+    setPendingHint(null);
+  };
+
+  const execute5050 = () => {
+    const team = getActiveTeam();
+    const hints = team === 1 ? playerHints.p1 : playerHints.p2;
+    if (!hints.fiftyFifty || wrongAnswers.length >= 2) return;
+
+    playSFX(SOUNDS.HINT_5050);
+    const allOptions = ['A', 'B', 'C', 'D'];
+    const wrongAvailable = allOptions.filter(o => o !== currentQuestion.right_answer && !wrongAnswers.includes(o));
+    const toHide = wrongAvailable.sort(() => 0.5 - Math.random()).slice(0, 2);
+    
+    setHistory(prev => ({
+      ...prev,
+      [currentQIndex]: { ...currentHistory, fiftyFiftyUsedForThis: toHide }
+    }));
+    setPlayerHints(prev => ({
+      ...prev,
+      [team === 1 ? 'p1' : 'p2']: { ...hints, fiftyFifty: false }
+    }));
+  };
+
+  const executeCallFriend = () => {
+    const team = getActiveTeam();
+    const hints = team === 1 ? playerHints.p1 : playerHints.p2;
+    if (!hints.callFriend) return;
+
+    playSFX(SOUNDS.HINT_CALL);
+    setCallFriendActive(true);
+    setCallTimerValue(32);
+    setIsTimerRunning(false);
+
+    setPlayerHints(prev => ({
+      ...prev,
+      [team === 1 ? 'p1' : 'p2']: { ...hints, callFriend: false }
+    }));
+  };
+
+  const executeFreeMistake = () => {
+    const team = getActiveTeam();
+    const hints = team === 1 ? playerHints.p1 : playerHints.p2;
+    if (!hints.freeMistake || freeMistakeActive) return;
+
+    playSFX(SOUNDS.HINT_MISTAKE);
+    setFreeMistakeActive(true);
+    setPlayerHints(prev => ({
+      ...prev,
+      [team === 1 ? 'p1' : 'p2']: { ...hints, freeMistake: false }
+    }));
+  };
+
+  const startCallTimer = () => {
+    setIsTimerRunning(true);
+    playBGM(SOUNDS.CALL_TIMER, false);
+    timerRef.current = setInterval(() => {
+      setCallTimerValue(prev => {
+        if (prev <= 1) {
+          stopCallFriend();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const stopCallFriend = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    stopBGM(); 
+    setCallFriendActive(false);
+    setIsTimerRunning(false);
+    if (currentQuestion.sound) playBGM(currentQuestion.sound, false);
+  };
+
+  // --- Game State Handlers ---
+  const handleStartGame = () => {
+    stopAll();
+    setScores({ p1: Math.max(0, team1StartScore), p2: Math.max(0, team2StartScore) });
+    setPlayerHints({ p1: { ...initialHints }, p2: { ...initialHints } });
+    setScoredIndices([]);
+    setHistory({});
+    setCurrentQIndex(0);
+    setPhase(GamePhase.TOPICS_MENU);
+    playBGM(SOUNDS.TOPIC, false);
+  };
+
+  const handleSelectTopic = (topicId: string) => {
+    const firstQOfTopic = questions.findIndex(q => q.topic === topicId);
+    setCurrentQIndex(firstQOfTopic);
+    setPhase(GamePhase.TOPIC_INTRO);
+  };
+
+  const handleNextQuestion = () => {
+    stopAll();
+    setFreeMistakeActive(false);
+    if (currentQIndex < questions.length - 1) {
+      const nextIndex = currentQIndex + 1;
+      const nextQ = questions[nextIndex];
+      const prevQ = questions[currentQIndex];
+      setCurrentQIndex(nextIndex);
+      if (nextQ.topic !== prevQ.topic) setPhase(GamePhase.SCOREBOARD);
+      else {
+        setPhase(GamePhase.QUESTION);
+        if (nextQ.sound) playBGM(nextQ.sound, false);
+      }
+    } else {
+      setPhase(GamePhase.GAME_OVER);
+      playSFX(SOUNDS.WIN);
+    }
+  };
+
+  const handleAnswer = (option: string) => {
+    if (isCorrect || wrongAnswers.includes(option) || hiddenBy5050.includes(option) || callFriendActive || pendingHint) return;
+    const activeTeam = getActiveTeam();
+    const isAnswerCorrect = option === currentQuestion.right_answer;
+
+    if (isAnswerCorrect) {
+      stopBGM();
+      setHistory(prev => ({
+        ...prev,
+        [currentQIndex]: { ...currentHistory, isCorrect: true }
+      }));
+      if (!scoredIndices.includes(currentQIndex)) {
+        const points = calculatePoints();
+        setScores(prev => ({
+          ...prev,
+          [activeTeam === 1 ? 'p1' : 'p2']: prev[activeTeam === 1 ? 'p1' : 'p2'] + points
+        }));
+        setScoredIndices(prev => [...prev, currentQIndex]);
+      }
+      setPhase(GamePhase.EXTRA_INFO);
+      playSFX(currentQuestion.correct_sound || SOUNDS.CORRECT);
+    } else {
+      if (freeMistakeActive) {
+        setFreeMistakeActive(false);
+        setHistory(prev => ({
+          ...prev,
+          [currentQIndex]: { ...currentHistory, wrong: [...currentHistory.wrong, option] }
+        }));
+        playSFX(currentQuestion.wrong_sound || SOUNDS.WRONG);
+      } else {
+        setHistory(prev => ({
+          ...prev,
+          [currentQIndex]: {
+            ...currentHistory,
+            wrong: [...currentHistory.wrong, option],
+            attempts: currentHistory.attempts + 1
+          }
+        }));
+        playSFX(currentQuestion.wrong_sound || SOUNDS.WRONG);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (callFriendActive || pendingHint) return;
+      if (phase === GamePhase.EXTRA_INFO || phase === GamePhase.SCOREBOARD) {
+        if (e.code === 'Space' || e.key === 'Enter' || e.key === 'ArrowRight') {
+          if (phase === GamePhase.SCOREBOARD) setPhase(GamePhase.TOPIC_INTRO);
+          else handleNextQuestion();
+        }
+        return;
+      }
+      if (phase !== GamePhase.QUESTION) return;
+      const key = e.key.toUpperCase();
+      if (['A', 'B', 'C', 'D'].includes(key)) handleAnswer(key);
+      if (e.key === 'ArrowRight') handleNextQuestion();
+      if (e.key === 'ArrowLeft' && currentQIndex > 0) {
+           stopAll();
+           setCurrentQIndex(prev => prev - 1);
+           setPhase(GamePhase.QUESTION);
+           const prevQ = questions[currentQIndex - 1];
+           if (prevQ.sound) playBGM(prevQ.sound, false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, currentQIndex, questions, currentHistory, scoredIndices, callFriendActive, freeMistakeActive, pendingHint]);
+
+  // --- Components ---
+  const AudioToggle = () => (
+    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+      <button onClick={() => setLang(lang === 'en' ? 'ru' : 'en')} className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl group flex items-center justify-center"><Globe size={24} className="text-blue-400" /></button>
+      <button onClick={() => setIsMuted(!isMuted)} className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl group">{isMuted ? <VolumeX className="text-red-400" /> : <Volume2 className="text-game-accent" />}</button>
+    </div>
+  );
+
+  const HintButtons = ({ team }: { team: 1 | 2 }) => {
+    const hints = team === 1 ? playerHints.p1 : playerHints.p2;
+    const isMyTurn = getActiveTeam() === team;
+    const canUse = isMyTurn && phase === GamePhase.QUESTION && !isCorrect;
+
+    return (
+      <div className={`flex gap-3 transition-opacity ${isMyTurn ? 'opacity-100' : 'opacity-40'}`}>
+        <button 
+          onClick={() => requestUseHint('fiftyFifty')}
+          disabled={!canUse || !hints.fiftyFifty || wrongAnswers.length >= 2}
+          className={`p-3 rounded-full border-2 flex items-center justify-center transition-all ${hints.fiftyFifty ? 'bg-slate-800 border-indigo-400 text-indigo-400 hover:scale-110' : 'bg-slate-900 border-slate-700 text-slate-700 opacity-50'}`}
+          title="50/50"
+        >
+          <Scissors size={20} />
+        </button>
+        <button 
+          onClick={() => requestUseHint('callFriend')}
+          disabled={!canUse || !hints.callFriend}
+          className={`p-3 rounded-full border-2 flex items-center justify-center transition-all ${hints.callFriend ? 'bg-slate-800 border-blue-400 text-blue-400 hover:scale-110' : 'bg-slate-900 border-slate-700 text-slate-700 opacity-50'}`}
+          title="Call a Friend"
+        >
+          <Phone size={20} />
+        </button>
+        <button 
+          onClick={() => requestUseHint('freeMistake')}
+          disabled={!canUse || !hints.freeMistake}
+          className={`p-3 rounded-full border-2 flex items-center justify-center transition-all ${hints.freeMistake ? 'bg-slate-800 border-green-400 text-green-400 hover:scale-110' : 'bg-slate-900 border-slate-700 text-slate-700 opacity-50'}`}
+          title="Free Mistake"
+        >
+          <ShieldCheck size={20} />
+        </button>
+      </div>
+    );
+  };
+
+  const CallFriendModal = () => {
+    if (!callFriendActive) return null;
+    return (
+      <div className="fixed inset-0 z-[250] flex items-end justify-end p-8 pointer-events-none">
+        <div className="bg-slate-900/95 border-2 border-blue-500/50 rounded-3xl p-6 w-72 shadow-2xl text-center flex flex-col items-center pointer-events-auto backdrop-blur-sm transform animate-in slide-in-from-bottom-8 duration-300">
+          <Phone size={32} className={`mb-4 ${isTimerRunning ? 'text-blue-400 animate-pulse' : 'text-slate-500'}`} />
+          <h3 className="text-lg font-bold mb-2 text-white uppercase tracking-widest">{t.callTimerTitle}</h3>
+          <div className="text-5xl font-mono font-black text-white mb-6 bg-slate-800 px-6 py-3 rounded-xl border border-white/5 shadow-inner">
+            {callTimerValue}
+          </div>
+          {!isTimerRunning ? (
+            <Button onClick={startCallTimer} className="w-full text-sm flex items-center justify-center gap-2">
+              <Timer size={18} /> {t.startTimer}
+            </Button>
+          ) : (
+            <Button variant="danger" onClick={stopCallFriend} className="w-full text-sm">
+              {t.done}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const HintConfirmModal = () => {
+    if (!pendingHint) return null;
+    
+    let hintName = '';
+    if (pendingHint === 'fiftyFifty') hintName = t.hint5050;
+    else if (pendingHint === 'callFriend') hintName = t.hintCall;
+    else if (pendingHint === 'freeMistake') hintName = t.hintMistake;
+    
+    return (
+      <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div className="bg-slate-900 border-2 border-game-accent/30 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-200">
+          <AlertCircle size={48} className="text-game-accent mx-auto mb-4" />
+          <h3 className="text-2xl font-bold mb-2 text-white">{t.confirmHintTitle}</h3>
+          <p className="text-slate-400 mb-8 leading-relaxed">{t.confirmHintMessage.replace('{hint}', hintName)}</p>
+          <div className="flex gap-4">
+            <Button variant="secondary" className="flex-1" onClick={() => setPendingHint(null)}>{t.cancel}</Button>
+            <Button className="flex-1" onClick={confirmHint}>{t.yes}</Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ScoreModalContent = () => (
+    <div className="space-y-6">
+      <div className="bg-slate-800/80 p-6 rounded-2xl border-2 border-indigo-500/30 flex justify-between items-center transition-all hover:scale-105">
+        <div className="flex flex-col">
+          <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">{t.player1}</span>
+          <span className="text-2xl text-white font-bold">{team1Name}</span>
+          <div className="mt-2 flex gap-1">
+            <div className={`w-3 h-3 rounded-full ${playerHints.p1.fiftyFifty ? 'bg-indigo-400' : 'bg-slate-700'}`} title="50/50"></div>
+            <div className={`w-3 h-3 rounded-full ${playerHints.p1.callFriend ? 'bg-blue-400' : 'bg-slate-700'}`} title="Call Friend"></div>
+            <div className={`w-3 h-3 rounded-full ${playerHints.p1.freeMistake ? 'bg-green-400' : 'bg-slate-700'}`} title="Free Mistake"></div>
+          </div>
+        </div>
+        <span className="text-6xl font-mono text-white font-black">{scores.p1}</span>
+      </div>
+      {mode === GameMode.TWO_PLAYER && (
+        <div className="bg-slate-800/80 p-6 rounded-2xl border-2 border-indigo-500/30 flex justify-between items-center transition-all hover:scale-105">
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">{t.player2}</span>
+            <span className="text-2xl text-white font-bold">{team2Name}</span>
+            <div className="mt-2 flex gap-1">
+              <div className={`w-3 h-3 rounded-full ${playerHints.p2.fiftyFifty ? 'bg-indigo-400' : 'bg-slate-700'}`} title="50/50"></div>
+              <div className={`w-3 h-3 rounded-full ${playerHints.p2.callFriend ? 'bg-blue-400' : 'bg-slate-700'}`} title="Call Friend"></div>
+              <div className={`w-3 h-3 rounded-full ${playerHints.p2.freeMistake ? 'bg-green-400' : 'bg-slate-700'}`} title="Free Mistake"></div>
+            </div>
+          </div>
+          <span className="text-6xl font-mono text-white font-black">{scores.p2}</span>
+        </div>
+      )}
+    </div>
+  );
+
+  // --- Views ---
+  if (phase === GamePhase.SETUP) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-game-dark via-game-mid to-black">
+        <AudioToggle />
+        <div className="max-w-xl w-full bg-slate-800/50 p-8 rounded-2xl border border-white/10 backdrop-blur-sm shadow-2xl">
+          <h1 className="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-game-accent to-yellow-200">{t.title}</h1>
+          <div className="space-y-6">
+            <div className="flex gap-4 justify-center bg-slate-900/50 p-2 rounded-lg">
+              <button onClick={() => setMode(GameMode.SINGLE_PLAYER)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${mode === GameMode.SINGLE_PLAYER ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}><User size={20} /> 1 Player</button>
+              <button onClick={() => setMode(GameMode.TWO_PLAYER)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${mode === GameMode.TWO_PLAYER ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}><Users size={20} /> 2 Players</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4 bg-slate-900/40 p-4 rounded-xl border border-white/5">
+                <div className="flex items-center gap-2 mb-2 text-indigo-400 font-bold uppercase text-xs tracking-widest"><User size={14}/> {t.player1}</div>
+                <div><label className="block text-xs text-gray-400 mb-1">{t.name}</label><input type="text" value={team1Name} onChange={(e) => setTeam1Name(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-game-accent transition-colors" /></div>
+                <div><label className="block text-xs text-gray-400 mb-1">{t.initialScore}</label><input type="number" min="0" value={team1StartScore} onChange={(e) => setTeam1StartScore(Math.max(0, parseInt(e.target.value) || 0))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-game-accent transition-colors" /></div>
+              </div>
+              {mode === GameMode.TWO_PLAYER && (
+                <div className="space-y-4 bg-slate-900/40 p-4 rounded-xl border border-white/5">
+                  <div className="flex items-center gap-2 mb-2 text-indigo-400 font-bold uppercase text-xs tracking-widest"><Users size={14}/> {t.player2}</div>
+                  <div><label className="block text-xs text-gray-400 mb-1">{t.name}</label><input type="text" value={team2Name} onChange={(e) => setTeam2Name(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-game-accent transition-colors" /></div>
+                  <div><label className="block text-xs text-gray-400 mb-1">{t.initialScore}</label><input type="number" min="0" value={team2StartScore} onChange={(e) => setTeam2StartScore(Math.max(0, parseInt(e.target.value) || 0))} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:border-game-accent transition-colors" /></div>
+                </div>
+              )}
+            </div>
+            <Button onClick={handleStartGame} className="w-full text-lg mt-4">{t.startGame}</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === GamePhase.TOPICS_MENU) {
+    return (
+      <div className="min-h-screen bg-game-dark p-8 flex flex-col items-center">
+        <AudioToggle />
+        <ScoreModal show={showScoreModal} onClose={() => setShowScoreModal(false)} />
+        <h1 className="text-4xl font-bold mb-8 text-game-accent flex items-center gap-3"><LayoutGrid size={32} /> {t.chooseCategory}</h1>
+        <div className="mb-10 w-full max-w-5xl flex flex-col md:flex-row justify-center gap-4">
+          <Button onClick={() => { setCurrentQIndex(0); setPhase(GamePhase.TOPIC_INTRO); playBGM(SOUNDS.TOPIC, false); }} className="px-12 text-xl bg-gradient-to-r from-emerald-600 to-teal-600 border-emerald-400 flex items-center justify-center gap-3"><Play size={24} /> {t.startInOrder}</Button>
+          <Button variant="secondary" onClick={() => setShowScoreModal(true)} className="flex items-center justify-center gap-2"><BarChart3 size={20} /> {t.showScore}</Button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl mb-12">
+          {availableTopics.map((topic) => {
+            const completed = isTopicCompleted(topic.id);
+            return (
+              <button key={topic.id} onClick={() => handleSelectTopic(topic.id)} className={`p-8 rounded-2xl border-2 transition-all text-left group relative overflow-hidden ${completed ? 'bg-slate-900/50 border-slate-800 opacity-50 grayscale' : 'bg-slate-800/80 border-slate-700 hover:border-game-accent hover:bg-slate-700'}`}>
+                <h3 className={`text-2xl font-bold transition-colors ${completed ? 'text-slate-500' : 'text-white group-hover:text-game-accent'}`}>{topic.name}</h3>
+                <p className="text-slate-400 mt-2 text-sm uppercase tracking-widest">{completed ? t.completed : t.startQuiz}</p>
+                {completed && <div className="absolute top-2 right-2 text-slate-700"><AlertCircle size={20} /></div>}
+              </button>
+            );
+          })}
+        </div>
+        <Button variant="secondary" onClick={() => setShowQuitConfirm(true)}>{t.backToSetup}</Button>
+        <ConfirmModal show={showQuitConfirm} title={t.quitTitle} message={t.quitMessage} onConfirm={() => { stopAll(); setPhase(GamePhase.SETUP); setShowQuitConfirm(false); }} onCancel={() => setShowQuitConfirm(false)} />
+      </div>
+    );
+  }
+
+  if (phase === GamePhase.TOPIC_INTRO) {
+    return (
+      <div onClick={() => { stopAll(); setPhase(GamePhase.QUESTION); if (currentQuestion.sound) playBGM(currentQuestion.sound, false); }} className="min-h-screen flex flex-col items-center justify-center bg-game-dark cursor-pointer animate-in fade-in duration-700">
+        <AudioToggle />
+        <div className="absolute top-8 left-8"><Button variant="secondary" onClick={(e) => { e.stopPropagation(); setShowTopicsConfirm(true); }}><LayoutGrid size={18} className="inline mr-2" /> {t.categories}</Button></div>
+        <h2 className="text-2xl text-indigo-300 uppercase tracking-[0.2em] mb-4">{t.newCategory}</h2>
+        <div className="w-24 h-1 bg-indigo-500 mb-8 rounded-full"></div>
+        <h1 className="text-6xl md:text-8xl font-black text-center text-white leading-tight px-4">{currentQuestion.topicName}</h1>
+        <p className="mt-12 text-slate-400 animate-bounce text-xl">{t.clickToContinue}</p>
+      </div>
+    );
+  }
+
+  if (phase === GamePhase.SCOREBOARD) {
+    return (
+      <div onClick={() => { setPhase(GamePhase.TOPIC_INTRO); playBGM(SOUNDS.TOPIC, false); }} className="min-h-screen bg-game-dark flex flex-col items-center justify-center cursor-pointer p-4 animate-in fade-in duration-500">
+        <AudioToggle />
+        <Trophy size={80} className="text-game-accent mb-6 animate-pulse" />
+        <h2 className="text-4xl font-bold mb-12 text-white">{t.currentScoreboard}</h2>
+        <div className="w-full max-w-2xl"><ScoreModalContent /></div>
+        <p className="mt-12 text-slate-400 animate-pulse text-xl">{t.clickToContinue}</p>
+      </div>
+    );
+  }
+
+  if (phase === GamePhase.GAME_OVER) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-game-dark p-4">
+        <AudioToggle />
+        <Trophy size={80} className="text-game-accent mb-6 animate-pulse" />
+        <h1 className="text-5xl font-bold mb-8">{t.gameOver}</h1>
+        <div className="w-full max-w-2xl mb-12"><ScoreModalContent /></div>
+        <div className="flex gap-4">
+          <Button variant="secondary" onClick={() => setPhase(GamePhase.TOPICS_MENU)}><LayoutGrid size={18} className="inline mr-2" /> {t.categories}</Button>
+          <Button onClick={() => { stopAll(); setPhase(GamePhase.SETUP); }}><RefreshCw className="inline mr-2" /> {t.newGame}</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const activeTeamId = getActiveTeam();
+  const activeTeamName = activeTeamId === 1 ? team1Name : team2Name;
+  const potentialPoints = calculatePoints();
+
+  return (
+    <div className="min-h-screen bg-game-dark flex flex-col relative overflow-hidden">
+      <AudioToggle />
+      <CallFriendModal />
+      <HintConfirmModal />
+      <ConfirmModal show={showQuitConfirm} title={t.quitToMenu} message={t.quitMessageLost} onConfirm={() => { stopAll(); setPhase(GamePhase.SETUP); setShowQuitConfirm(false); }} onCancel={() => setShowQuitConfirm(false)} />
+      <ConfirmModal show={showTopicsConfirm} title={t.goCategories} message={t.progressSaved} onConfirm={() => { stopAll(); setPhase(GamePhase.TOPICS_MENU); setShowTopicsConfirm(false); }} onCancel={() => setShowTopicsConfirm(false)} />
+
+      {/* Main UI Header */}
+      <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-white/5 p-4 flex justify-between items-center shadow-lg">
+        <div className="flex items-center gap-4">
+          <button onClick={() => setShowQuitConfirm(true)} className="text-slate-500 hover:text-red-400 transition-colors p-1" title="Quit"><XCircle size={24} /></button>
+          <button onClick={() => setShowTopicsConfirm(true)} className="text-slate-500 hover:text-indigo-400 transition-colors p-1" title={t.categories}><LayoutGrid size={24} /></button>
+          <div className="text-sm md:text-base font-mono text-gray-400">
+            Q{currentQIndex + 1}/{questions.length} 
+            <span className="mx-2 text-slate-600">|</span> 
+            <span className="text-indigo-400 uppercase tracking-wide font-bold">{currentQuestion.topicName}</span>
+          </div>
+        </div>
+        
+        {/* Central Hint Console */}
+        <div className="flex items-center gap-8 lg:gap-16">
+            <div className="flex flex-col items-center scale-90 lg:scale-100"><HintButtons team={1} /></div>
+            {mode === GameMode.TWO_PLAYER && (<div className="flex flex-col items-center scale-90 lg:scale-100"><HintButtons team={2} /></div>)}
+        </div>
+
+        {/* Real-time Scores */}
+        <div className="flex items-center gap-6">
+            <div className={`flex flex-col items-end transition-all ${activeTeamId === 1 && !isCorrect ? 'text-game-accent scale-110' : 'text-white opacity-70'}`}>
+              <span className="text-[10px] lg:text-xs uppercase font-bold tracking-tighter">{team1Name}</span>
+              <span className="text-lg lg:text-2xl font-mono font-black">{scores.p1}</span>
+            </div>
+            {mode === GameMode.TWO_PLAYER && (
+              <>
+                <div className="h-8 w-px bg-slate-700"></div>
+                <div className={`flex flex-col items-start transition-all ${activeTeamId === 2 && !isCorrect ? 'text-game-accent scale-110' : 'text-white opacity-70'}`}>
+                  <span className="text-[10px] lg:text-xs uppercase font-bold tracking-tighter">{team2Name}</span>
+                  <span className="text-lg lg:text-2xl font-mono font-black">{scores.p2}</span>
+                </div>
+              </>
+            )}
+        </div>
+      </div>
+
+      <div className="flex-1 container mx-auto px-4 py-6 max-w-5xl flex flex-col z-10">
+        <div className="flex-1 flex flex-col items-center justify-center mb-8">
+            {!isCorrect && (
+              <div className="flex flex-col items-center gap-2 mb-6">
+                <div className="px-5 py-1.5 bg-slate-800 rounded-full border border-slate-700 flex items-center gap-3 animate-pulse shadow-lg">
+                  <span className="w-2.5 h-2.5 rounded-full bg-game-accent shadow-[0_0_8px_rgba(255,215,0,0.8)]"></span>
+                  <span className="text-sm font-bold text-gray-200 uppercase tracking-widest">{t.turnFor} {activeTeamName}: <span className="text-game-accent font-black">{potentialPoints} {t.pts}</span></span>
+                </div>
+                {freeMistakeActive && (<div className="flex items-center gap-2 text-green-400 text-[10px] font-black uppercase tracking-[0.2em] animate-bounce bg-green-900/20 px-3 py-1 rounded-full border border-green-500/30"><ShieldCheck size={14} /> {t.freeMistakeActive}</div>)}
+              </div>
+            )}
+            
+            {currentQuestion.image && (
+              <div className="mb-6 rounded-2xl overflow-hidden border-4 border-slate-700 shadow-2xl max-h-[35vh] group relative">
+                <img src={currentQuestion.image} className="object-contain max-h-full max-w-full" alt="Question" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+              </div>
+            )}
+            
+            <div className="w-full bg-gradient-to-b from-slate-800 to-slate-900 border-x-2 border-y-4 border-slate-600 p-6 md:p-10 rounded-2xl shadow-2xl text-center relative ring-4 ring-slate-900">
+              <h2 className="text-xl md:text-3xl font-extrabold leading-relaxed text-white drop-shadow-md">{currentQuestion.question}</h2>
+              {currentQuestion.sound && (
+                <button onClick={() => playBGM(currentQuestion.sound, false)} className="absolute bottom-[-22px] left-1/2 transform -translate-x-1/2 bg-indigo-600 hover:bg-indigo-500 p-3 rounded-full shadow-2xl border-4 border-slate-900 text-white transition-all hover:scale-110 active:scale-90">
+                  <Volume2 size={24} />
+                </button>
+              )}
+            </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+            {Object.entries(currentQuestion.options).map(([key, value]) => {
+                let status: 'idle' | 'correct' | 'wrong' | 'disabled' = 'idle';
+                if (isCorrect && key === currentQuestion.right_answer) status = 'correct';
+                else if (wrongAnswers.includes(key)) status = 'wrong';
+                else if (isCorrect || hiddenBy5050.includes(key)) status = 'disabled';
+                
+                return (<OptionCard key={key} label={key} text={value} status={status} onClick={() => handleAnswer(key)} disabled={isCorrect || wrongAnswers.includes(key) || hiddenBy5050.includes(key)} />);
+            })}
+        </div>
+        
+        {/* Correct Answer Modal */}
+        {phase === GamePhase.EXTRA_INFO && (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                <div className="bg-slate-900 border-2 border-green-500/50 rounded-3xl p-8 max-w-2xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+                    <h3 className="text-4xl font-black text-green-400 mb-6 flex items-center gap-4 text-center justify-center"><span className="text-5xl drop-shadow-lg">✓</span> {t.correct}</h3>
+                    <div className="space-y-6 flex flex-col overflow-y-auto px-2">
+                        {currentQuestion.image_extra && (<div className="rounded-xl overflow-hidden border-4 border-slate-700 shadow-xl mx-auto max-w-[90%]"><img src={currentQuestion.image_extra} className="object-contain max-h-[35vh] w-full" alt="Explanation" /></div>)}
+                        <div className="bg-slate-800/80 p-8 rounded-2xl border-2 border-white/5 text-center text-xl md:text-2xl font-semibold text-gray-100 leading-relaxed shadow-inner italic">{currentQuestion.extra}</div>
+                    </div>
+                    <div className="mt-8 flex justify-center items-center gap-6 pt-2">
+                        <Button variant="secondary" onClick={() => setShowTopicsConfirm(true)} className="h-14 flex items-center gap-2 px-8"><LayoutGrid size={22} /> {t.categories}</Button>
+                        <Button onClick={handleNextQuestion} className="flex-1 h-14 text-xl flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 border-green-400">{t.nextQuestion} <ArrowRight size={26} /></Button>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Bottom Navigation Hints */}
+        <div className="mt-8 flex justify-center gap-6 opacity-40 hover:opacity-100 transition-opacity">
+            <button onClick={() => { if (currentQIndex > 0) { stopAll(); setCurrentQIndex(prev => prev - 1); setPhase(GamePhase.QUESTION); const prevQ = questions[currentQIndex-1]; if (prevQ.sound) playBGM(prevQ.sound, false); } }} disabled={currentQIndex === 0} className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-0 transition-colors border border-slate-600"><ArrowLeft size={20} /></button>
+            <button onClick={handleNextQuestion} className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors border border-slate-600"><ArrowRight size={20} /></button>
+        </div>
+      </div>
+
+      <ConfirmModal show={showQuitConfirm} title={t.quitTitle} message={t.quitMessage} onConfirm={() => { stopAll(); setPhase(GamePhase.SETUP); setShowQuitConfirm(false); }} onCancel={() => setShowQuitConfirm(false)} />
+      <ScoreModal show={showScoreModal} onClose={() => setShowScoreModal(false)} />
+    </div>
+  );
+
+  function ConfirmModal({ show, onConfirm, onCancel, title, message }: { show: boolean, onConfirm: () => void, onCancel: () => void, title: string, message: string }) {
+    if (!show) return null;
+    return (
+      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4 animate-in fade-in duration-200">
+        <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-8 max-w-sm w-full text-center shadow-[0_0_50px_rgba(0,0,0,1)]">
+          <AlertCircle size={56} className="text-game-accent mx-auto mb-6 drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" />
+          <h3 className="text-2xl font-black mb-3 text-white uppercase tracking-tight">{title}</h3>
+          <p className="text-slate-400 mb-10 text-lg font-medium leading-relaxed">{message}</p>
+          <div className="flex gap-4">
+            <Button variant="secondary" className="flex-1 h-12" onClick={onCancel}>{t.cancel}</Button>
+            <Button variant="danger" className="flex-1 h-12" onClick={onConfirm}>{t.yes}</Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  function ScoreModal({ show, onClose }: { show: boolean, onClose: () => void }) {
+    if (!show) return null;
+    return (
+      <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4 animate-in fade-in duration-200" onClick={onClose}>
+        <div className="bg-slate-900 border-2 border-game-accent/30 rounded-3xl p-10 max-w-lg w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+          <h3 className="text-4xl font-black mb-10 text-center text-game-accent flex items-center justify-center gap-4 uppercase tracking-tighter">
+            <BarChart3 size={40} /> {t.currentScoreboard}
+          </h3>
+          <ScoreModalContent />
+          <Button onClick={onClose} className="w-full mt-10 h-14 text-xl uppercase tracking-widest bg-indigo-700 hover:bg-indigo-600">{t.continue}</Button>
+        </div>
+      </div>
+    );
+  };
+}
+

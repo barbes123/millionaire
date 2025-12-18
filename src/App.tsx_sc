@@ -1,0 +1,416 @@
+
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { GamePhase, GameMode, PlayerState, QuestionData } from './types';
+import { SAMPLE_QUESTIONS, SOUNDS } from './constants';
+import { playBGM, playSFX, stopBGM, stopSFX, stopAll } from './utils/audioManager';
+import { Button } from './components/Button';
+import { OptionCard } from './components/OptionCard';
+import { Users, User, Volume2, Trophy, ArrowRight, ArrowLeft, RefreshCw, XCircle } from 'lucide-react';
+
+export default function App() {
+  // --- Global State ---
+  const [phase, setPhase] = useState<GamePhase>(GamePhase.SETUP);
+  const [mode, setMode] = useState<GameMode>(GameMode.SINGLE_PLAYER);
+  
+  // Players
+  const [team1Name, setTeam1Name] = useState("Team 1");
+  const [team2Name, setTeam2Name] = useState("Team 2");
+  const [scores, setScores] = useState<{ p1: number, p2: number }>({ p1: 0, p2: 0 });
+
+  // Game Progress
+  const questions = useMemo(() => {
+    return [...SAMPLE_QUESTIONS].sort((a, b) => {
+      if (a.topic === b.topic) return a.id - b.id;
+      return a.topic.localeCompare(b.topic);
+    });
+  }, []);
+
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  
+  // Question State
+  const [wrongAnswers, setWrongAnswers] = useState<string[]>([]);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [attemptsCount, setAttemptsCount] = useState(0);
+
+  const currentQuestion = questions[currentQIndex];
+
+  // --- Logic Helpers ---
+
+  const getActiveTeamForInput = () => {
+    if (mode === GameMode.SINGLE_PLAYER) return 1;
+    const isOddQuestion = (currentQIndex + 1) % 2 !== 0;
+    
+    if (isOddQuestion) {
+      if (attemptsCount === 0) return 1;
+      if (attemptsCount === 1) return 2;
+      return 1;
+    } else {
+      if (attemptsCount === 0) return 2;
+      if (attemptsCount === 1) return 1;
+      return 2;
+    }
+  };
+
+  const calculatePoints = () => {
+    if (attemptsCount === 0) return 3;
+    if (attemptsCount === 1) return 2;
+    if (attemptsCount === 2) return 1;
+    return 0;
+  };
+
+  // --- Handlers ---
+
+  const handleStartGame = () => {
+    stopAll();
+    setScores({ p1: 0, p2: 0 });
+    setCurrentQIndex(0);
+    resetQuestionState();
+    setPhase(GamePhase.TOPIC_INTRO);
+    playBGM(SOUNDS.TOPIC, false);
+  };
+
+  const resetQuestionState = () => {
+    setWrongAnswers([]);
+    setIsCorrect(false);
+    setAttemptsCount(0);
+  };
+
+  const handleNextQuestion = () => {
+    stopAll(); 
+
+    if (currentQIndex < questions.length - 1) {
+      const nextIndex = currentQIndex + 1;
+      const nextQ = questions[nextIndex];
+      const prevQ = questions[currentQIndex];
+      
+      setCurrentQIndex(nextIndex);
+      resetQuestionState();
+      
+      if (nextQ.topic !== prevQ.topic) {
+        setPhase(GamePhase.TOPIC_INTRO);
+        playBGM(SOUNDS.TOPIC, false);
+      } else {
+        setPhase(GamePhase.QUESTION);
+        if (nextQ.sound) playBGM(nextQ.sound, false);
+      }
+    } else {
+      setPhase(GamePhase.GAME_OVER);
+      playSFX(SOUNDS.WIN);
+    }
+  };
+
+  const handleAnswer = (option: string) => {
+    if (isCorrect || wrongAnswers.includes(option)) return;
+
+    const activeTeam = getActiveTeamForInput();
+    const isAnswerCorrect = option === currentQuestion.right_answer;
+
+    if (isAnswerCorrect) {
+      stopBGM(); 
+      setIsCorrect(true);
+      const points = calculatePoints();
+      setScores(prev => ({
+        ...prev,
+        [activeTeam === 1 ? 'p1' : 'p2']: prev[activeTeam === 1 ? 'p1' : 'p2'] + points
+      }));
+      playSFX(currentQuestion.correct_sound || SOUNDS.CORRECT);
+    } else {
+      setWrongAnswers(prev => [...prev, option]);
+      setAttemptsCount(prev => prev + 1);
+      playSFX(currentQuestion.wrong_sound || SOUNDS.WRONG);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (phase !== GamePhase.QUESTION) {
+        if (phase === GamePhase.EXTRA_INFO && (e.code === 'Space' || e.key === 'Enter')) {
+           handleNextQuestion();
+        }
+        return;
+      }
+
+      const key = e.key.toUpperCase();
+      if (['A', 'B', 'C', 'D'].includes(key)) {
+        handleAnswer(key);
+      }
+      
+      if (e.key === 'ArrowRight') {
+         handleNextQuestion();
+      }
+      if (e.key === 'ArrowLeft') {
+        if (currentQIndex > 0) {
+           stopAll();
+           setCurrentQIndex(prev => prev - 1);
+           resetQuestionState();
+           setPhase(GamePhase.QUESTION);
+           const prevQ = questions[currentQIndex - 1];
+           if (prevQ.sound) playBGM(prevQ.sound, false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [phase, currentQIndex, wrongAnswers, isCorrect, questions]);
+
+  if (phase === GamePhase.SETUP) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-game-dark via-game-mid to-black">
+        <div className="max-w-md w-full bg-slate-800/50 p-8 rounded-2xl border border-white/10 backdrop-blur-sm shadow-2xl">
+          <h1 className="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-game-accent to-yellow-200">
+            Family Quiz
+          </h1>
+          <div className="space-y-6">
+            <div className="flex gap-4 justify-center bg-slate-900/50 p-2 rounded-lg">
+              <button 
+                onClick={() => setMode(GameMode.SINGLE_PLAYER)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${mode === GameMode.SINGLE_PLAYER ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+              >
+                <User size={20} /> 1 Player
+              </button>
+              <button 
+                onClick={() => setMode(GameMode.TWO_PLAYER)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${mode === GameMode.TWO_PLAYER ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+              >
+                <Users size={20} /> 2 Players
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Player 1 Name</label>
+                <input 
+                  type="text" 
+                  value={team1Name} 
+                  onChange={(e) => setTeam1Name(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              {mode === GameMode.TWO_PLAYER && (
+                 <div>
+                 <label className="block text-xs uppercase tracking-wider text-gray-400 mb-1">Player 2 Name</label>
+                 <input 
+                   type="text" 
+                   value={team2Name} 
+                   onChange={(e) => setTeam2Name(e.target.value)}
+                   className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500"
+                 />
+               </div>
+              )}
+            </div>
+            <Button onClick={handleStartGame} className="w-full text-lg">
+              Start Game
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === GamePhase.TOPIC_INTRO) {
+    return (
+      <div 
+        onClick={() => {
+            stopAll();
+            setPhase(GamePhase.QUESTION);
+            if (currentQuestion.sound) playBGM(currentQuestion.sound, false);
+        }}
+        className="min-h-screen flex flex-col items-center justify-center bg-game-dark cursor-pointer animate-in fade-in duration-700"
+      >
+        <h2 className="text-2xl text-indigo-300 uppercase tracking-[0.2em] mb-4">New Category</h2>
+        <div className="w-24 h-1 bg-indigo-500 mb-8 rounded-full"></div>
+        <h1 className="text-6xl md:text-8xl font-black text-center text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+          {currentQuestion.topicName}
+        </h1>
+        <p className="mt-12 text-slate-400 animate-bounce">Click to continue</p>
+      </div>
+    );
+  }
+
+  if (phase === GamePhase.GAME_OVER) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-game-dark p-4">
+        <Trophy size={80} className="text-game-accent mb-6 animate-pulse" />
+        <h1 className="text-5xl font-bold mb-8">Game Over!</h1>
+        <div className="flex gap-8 mb-12">
+          <div className="bg-slate-800 p-8 rounded-xl border border-slate-700 text-center min-w-[200px]">
+            <h3 className="text-gray-400 uppercase text-sm mb-2">{team1Name}</h3>
+            <p className="text-6xl font-mono font-bold text-white">{scores.p1}</p>
+          </div>
+          {mode === GameMode.TWO_PLAYER && (
+            <div className="bg-slate-800 p-8 rounded-xl border border-slate-700 text-center min-w-[200px]">
+              <h3 className="text-gray-400 uppercase text-sm mb-2">{team2Name}</h3>
+              <p className="text-6xl font-mono font-bold text-white">{scores.p2}</p>
+            </div>
+          )}
+        </div>
+        <Button onClick={() => { stopAll(); setPhase(GamePhase.SETUP); }}>
+          <RefreshCw className="inline mr-2" /> Play Again
+        </Button>
+      </div>
+    );
+  }
+
+  const activeTeam = getActiveTeamForInput();
+  const activeTeamName = activeTeam === 1 ? team1Name : team2Name;
+  const potentialPoints = calculatePoints();
+
+  return (
+    <div className="min-h-screen bg-game-dark flex flex-col relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-3xl"></div>
+        </div>
+
+      <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-white/5 p-4 flex justify-between items-center shadow-lg">
+        <div className="flex items-center gap-4">
+            <button onClick={() => { stopAll(); setPhase(GamePhase.SETUP); }} className="text-slate-500 hover:text-red-400 transition-colors" title="Quit Game">
+                <XCircle size={24} />
+            </button>
+            <div className="text-sm md:text-base font-mono text-gray-400">
+                Q{currentQIndex + 1}/{questions.length} <span className="mx-2 text-slate-600">|</span> <span className="text-indigo-400 uppercase tracking-wide">{currentQuestion.topicName}</span>
+            </div>
+        </div>
+
+        <div className="flex items-center gap-6">
+            <div className={`flex flex-col items-end ${activeTeam === 1 && !isCorrect ? 'text-game-accent' : 'text-white'}`}>
+                <span className="text-xs uppercase font-bold opacity-60">{team1Name}</span>
+                <span className="text-xl font-mono">{scores.p1}</span>
+            </div>
+            {mode === GameMode.TWO_PLAYER && (
+                <>
+                <div className="h-8 w-px bg-slate-700"></div>
+                <div className={`flex flex-col items-start ${activeTeam === 2 && !isCorrect ? 'text-game-accent' : 'text-white'}`}>
+                    <span className="text-xs uppercase font-bold opacity-60">{team2Name}</span>
+                    <span className="text-xl font-mono">{scores.p2}</span>
+                </div>
+                </>
+            )}
+        </div>
+      </div>
+
+      <div className="flex-1 z-10 container mx-auto px-4 py-6 max-w-5xl flex flex-col">
+        <div className="flex-1 flex flex-col items-center justify-center mb-8">
+            {!isCorrect && (
+                <div className="mb-6 px-4 py-1 bg-slate-800 rounded-full border border-slate-700 flex items-center gap-2 animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-game-accent"></span>
+                    <span className="text-sm font-semibold text-gray-300">
+                        {activeTeamName}'s Turn for <span className="text-game-accent">{potentialPoints} pts</span>
+                    </span>
+                </div>
+            )}
+
+            {currentQuestion.image && (
+                <div className="mb-6 rounded-lg overflow-hidden border-4 border-slate-700 shadow-2xl max-h-[30vh]">
+                    <img src={currentQuestion.image} alt="Question Visual" className="object-contain max-h-full max-w-full" />
+                </div>
+            )}
+
+            <div className="w-full bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-600 p-6 md:p-10 rounded-2xl shadow-xl text-center relative">
+                <div className="absolute top-1/2 -left-3 w-6 h-6 bg-slate-700 rotate-45 transform -translate-y-1/2 border border-slate-500"></div>
+                <div className="absolute top-1/2 -right-3 w-6 h-6 bg-slate-700 rotate-45 transform -translate-y-1/2 border border-slate-500"></div>
+                <h2 className="text-xl md:text-3xl font-bold leading-snug">{currentQuestion.question}</h2>
+                {currentQuestion.sound && (
+                    <button 
+                        onClick={() => playBGM(currentQuestion.sound, false)}
+                        className="absolute bottom-[-20px] left-1/2 transform -translate-x-1/2 bg-indigo-600 hover:bg-indigo-500 p-2 rounded-full shadow-lg border-2 border-slate-900 text-white transition-colors"
+                        title="Replay Sound"
+                    >
+                        <Volume2 size={20} />
+                    </button>
+                )}
+            </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            {Object.entries(currentQuestion.options).map(([key, value]) => {
+                let status: 'idle' | 'correct' | 'wrong' | 'disabled' = 'idle';
+                if (isCorrect && key === currentQuestion.right_answer) {
+                    status = 'correct';
+                } else if (wrongAnswers.includes(key)) {
+                    status = 'wrong';
+                } else if (isCorrect) {
+                    status = 'disabled';
+                }
+                return (
+                    <OptionCard 
+                        key={key}
+                        label={key}
+                        text={value}
+                        status={status}
+                        onClick={() => handleAnswer(key)}
+                        disabled={isCorrect || wrongAnswers.includes(key)}
+                    />
+                );
+            })}
+        </div>
+
+        {isCorrect && (
+            <div 
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in zoom-in duration-300"
+                onClick={phase === GamePhase.QUESTION ? () => {
+                    stopSFX();
+                    setPhase(GamePhase.EXTRA_INFO);
+                } : undefined}
+            >
+                <div className="bg-slate-900 border-2 border-green-500/50 rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative overflow-hidden flex flex-col">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-emerald-400"></div>
+                    <h3 className="text-3xl font-bold text-green-400 mb-4 flex items-center gap-3">
+                        <span className="text-4xl">✓</span> Correct!
+                    </h3>
+                    {phase === GamePhase.EXTRA_INFO ? (
+                        <div className="space-y-6 flex flex-col overflow-y-auto max-h-[80vh]">
+                            {currentQuestion.image_extra && (
+                              <div className="rounded-lg overflow-hidden border-2 border-slate-700 shadow-lg mx-auto max-w-[80%]">
+                                  <img 
+                                    src={currentQuestion.image_extra} 
+                                    alt="Explanation Visual" 
+                                    className="object-contain max-h-[30vh] w-full" 
+                                  />
+                              </div>
+                            )}
+                            <div className="bg-slate-800/50 p-6 rounded-xl border border-white/10">
+                                <p className="text-lg md:text-xl text-gray-200 leading-relaxed text-center">
+                                    {currentQuestion.extra}
+                                </p>
+                            </div>
+                            <div className="flex justify-center pb-2">
+                                <Button onClick={handleNextQuestion} className="flex items-center gap-2 text-lg px-10">
+                                    Next Question <ArrowRight size={20} />
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-slate-400 text-center mt-8 animate-pulse">Click anywhere or Press Space for details...</p>
+                    )}
+                </div>
+            </div>
+        )}
+
+        <div className="mt-8 flex justify-center gap-4 opacity-30 hover:opacity-100 transition-opacity">
+            <button 
+                onClick={() => {
+                    if (currentQIndex > 0) {
+                        stopAll();
+                        setCurrentQIndex(prev => prev - 1);
+                        resetQuestionState();
+                        setPhase(GamePhase.QUESTION);
+                    }
+                }}
+                disabled={currentQIndex === 0}
+                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-0"
+            >
+                <ArrowLeft size={16} />
+            </button>
+            <button 
+                onClick={handleNextQuestion}
+                className="p-2 rounded-full bg-slate-800 hover:bg-slate-700"
+            >
+                <ArrowRight size={16} />
+            </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

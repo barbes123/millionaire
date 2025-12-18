@@ -1,0 +1,5 @@
+{
+  "name": "Millionaire Family Quiz",
+  "description": "A TV-show style quiz game for 1 or 2 players with topic transitions, audio cues, and strategic scoring.",
+  "requestFramePermissions": []
+}

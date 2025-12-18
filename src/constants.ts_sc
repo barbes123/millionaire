@@ -1,0 +1,12 @@
+
+export const SOUNDS = {
+  // Use generic placeholders or relative paths to your public folder
+  CORRECT: "/music/yes.mp3", // Placeholder
+  WRONG: "/music/no.mp3", // Placeholder
+  WIN: "https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg", // Placeholder
+  TOPIC: "/music/zastavka.mp3", // Placeholder
+  HINT_5050: "/music/5050.mp3",
+  HINT_CALL: "/music/call_friend_start.mp3",
+  HINT_MISTAKE: "/music/free_mistake.mp3",
+  CALL_TIMER: "/music/call_timer.mp3"
+};

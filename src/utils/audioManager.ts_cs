@@ -1,0 +1,11 @@
+export const playSound = (url?: string) => {
+  if (!url) return;
+  
+  const audio = new Audio(url);
+  audio.volume = 0.5;
+  
+  audio.play().catch(err => {
+    console.warn("Audio play failed (user interaction might be needed first):", err);
+  });
+};
+
