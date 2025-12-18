@@ -62,19 +62,16 @@ To add your own:
 ### Errors
 
 If it complains 
+```bash
 > family-quiz@0.0.0 dev
 > vite
-
 sh: 1: vite: not found
-
+```
 Try:
 
+```bash
 rm -rf node_modules package-lock.json
-
-
 npm cache clean --force
-
 npm pkg delete overrides
-
 npm install
-
+```
