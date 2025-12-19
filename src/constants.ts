@@ -291,8 +291,8 @@ export const SOUNDS = {
   WRONG: "/music/no.mp3", // Placeholder
   WIN: "https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg", // Placeholder
   TOPIC: "/music/zastavka.mp3", // Placeholder
-  HINT_5050: "/music/5050.mp3",
-  HINT_CALL: "/music/call_friend_start.mp3",
-  HINT_MISTAKE: "/music/free_mistake.mp3",
-  CALL_TIMER: "/music/call_timer.mp3"
+  HINT_5050: "/music/50_50.mp3",
+  HINT_CALL: "/music/friend_hint.mp3",
+  HINT_MISTAKE: "/music/q6-yes_defend.mp3",
+  CALL_TIMER: "/music/friend-clock.mp3"
 };

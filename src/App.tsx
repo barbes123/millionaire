@@ -10,7 +10,7 @@ import { OptionCard } from './components/OptionCard';
 import { 
   Users, User, Volume2, VolumeX, Trophy, ArrowRight, ArrowLeft, 
   RefreshCw, XCircle, LayoutGrid, AlertCircle, Play, Globe, 
-  BarChart3, Phone, Scissors, ShieldCheck, Timer, Upload, CheckCircle2 
+  BarChart3, Phone, Scissors, ShieldCheck, Timer, Upload, CheckCircle2, 
 } from 'lucide-react';
 
 interface QuestionHistory {
@@ -138,7 +138,7 @@ export default function App() {
 
   const [freeMistakeActive, setFreeMistakeActive] = useState(false);
   const [callFriendActive, setCallFriendActive] = useState(false);
-  const [callTimerValue, setCallTimerValue] = useState(30);
+  const [callTimerValue, setCallTimerValue] = useState(32);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [pendingHint, setPendingHint] = useState<'fiftyFifty' | 'callFriend' | 'freeMistake' | null>(null);
   const [hoverTooltip, setHoverTooltip] = useState<string | null>(null);
@@ -149,13 +149,19 @@ export default function App() {
   const [showTopicsConfirm, setShowTopicsConfirm] = useState(false);
   const [customQuestions, setCustomQuestions] = useState<QuestionData[] | null>(null);
 
-  const questions = useMemo(() => {
+ /* const questions = useMemo(() => {
     const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
     return [...rawSet].sort((a, b) => {
       if (a.topic === b.topic) return a.id - b.id;
       return a.topic.localeCompare(b.topic);
     });
-  }, [lang, customQuestions]);
+  }, [lang, customQuestions]);*/
+  
+  const questions = useMemo(() => {
+  const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
+  // Return as-is, no sorting
+  return [...rawSet];
+}, [lang, customQuestions]);
 
   const availableTopics = useMemo(() => {
     const topicOrder: string[] = [];
@@ -249,7 +255,7 @@ export default function App() {
     if (!hints.callFriend) return;
     playSFX(SOUNDS.HINT_CALL);
     setCallFriendActive(true);
-    setCallTimerValue(30);
+    setCallTimerValue(32);
     setIsTimerRunning(false);
     setPlayerHints(prev => ({ ...prev, [team === 1 ? 'p1' : 'p2']: { ...hints, callFriend: false } }));
   };
@@ -349,6 +355,29 @@ export default function App() {
       }
     }
   };
+    
+//  useEffect(() => {
+  // Play music when topic screen becomes active
+ // if (phase === GamePhase.TOPICS_MENU) {
+   // playBGM(SOUNDS.TOPIC, false); // Play once
+    
+    // Return cleanup function to stop music
+    //return () => {
+     // stopBGM();
+    //};
+ // }
+//}, [phase]); // This runs every time phase changes
+
+useEffect(() => {
+  if (phase === GamePhase.TOPICS_MENU || phase === GamePhase.TOPIC_INTRO) {
+    playBGM(SOUNDS.TOPIC, false); // Play once
+    
+    return () => {
+      stopBGM();
+    };
+  }
+}, [phase]);
+
 
   const handleNextQuestion = () => {
     stopAll();
