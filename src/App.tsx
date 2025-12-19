@@ -10,7 +10,8 @@ import { OptionCard } from './components/OptionCard';
 import { 
   Users, User, Volume2, VolumeX, Trophy, ArrowRight, ArrowLeft, 
   RefreshCw, XCircle, LayoutGrid, AlertCircle, Play, Globe, 
-  BarChart3, Phone, Scissors, ShieldCheck, Timer, Upload, CheckCircle2, 
+  BarChart3, Phone, Scissors, ShieldCheck, Timer, Upload, CheckCircle2,
+  Maximize2, Minimize2   
 } from 'lucide-react';
 
 interface QuestionHistory {
@@ -148,6 +149,7 @@ export default function App() {
   const [showQuitConfirm, setShowQuitConfirm] = useState(false);
   const [showTopicsConfirm, setShowTopicsConfirm] = useState(false);
   const [customQuestions, setCustomQuestions] = useState<QuestionData[] | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
  /* const questions = useMemo(() => {
     const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
@@ -290,6 +292,25 @@ export default function App() {
     setIsTimerRunning(false);
     if (currentQuestion.sound) playBGM(currentQuestion.sound, false);
   };
+  
+  
+  const toggleFullscreen = () => {
+  if (!document.fullscreenElement) {
+    // Enter fullscreen
+    document.documentElement.requestFullscreen().then(() => {
+      setIsFullscreen(true);
+    }).catch(err => {
+      console.error(`Error attempting to enable fullscreen: ${err.message}`);
+    });
+  } else {
+    // Exit fullscreen
+    if (document.exitFullscreen) {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+	      });
+	    }
+	  }
+	};
 
   const handleStartGame = () => {
     stopAll();
@@ -378,6 +399,18 @@ useEffect(() => {
   }
 }, [phase]);
 
+useEffect(() => {
+  const handleFullscreenChange = () => {
+    setIsFullscreen(!!document.fullscreenElement);
+  };
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  
+  return () => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  };
+}, []);
+
 
   const handleNextQuestion = () => {
     stopAll();
@@ -427,37 +460,58 @@ useEffect(() => {
            setPhase(GamePhase.QUESTION);
            if (questions[currentQIndex-1].sound) playBGM(questions[currentQIndex-1].sound, false);
       }
-    };
+      if (e.key === 'F11' || (e.key === 'f' && e.ctrlKey)) {
+	  e.preventDefault(); // Prevent browser's default F11 behavior
+	  toggleFullscreen();
+	}
+    };    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [phase, currentQIndex, questions, currentHistory, scoredIndices, callFriendActive, freeMistakeActive, pendingHint, isCorrect, showQuitConfirm, showTopicsConfirm]);
 
-  const AudioToggle = () => (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 items-end">
-      {hoverTooltip && (
-        <div className="bg-black/90 text-white text-[10px] font-bold px-3 py-1 rounded border border-white/20 mb-1 animate-in fade-in slide-in-from-right-2">
-            {hoverTooltip}
-        </div>
+const AudioToggle = () => (
+  <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 items-end">
+    {hoverTooltip && (
+      <div className="bg-black/90 text-white text-[10px] font-bold px-3 py-1 rounded border border-white/20 mb-1 animate-in fade-in slide-in-from-right-2">
+        {hoverTooltip}
+      </div>
+    )}
+    
+    {/* Fullscreen Toggle Button */}
+    <button 
+      onMouseEnter={() => setHoverTooltip(isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")}
+      onMouseLeave={() => setHoverTooltip(null)}
+      onClick={toggleFullscreen} 
+      className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-purple-500 transition-all shadow-xl flex items-center justify-center"
+    >
+      {isFullscreen ? (
+        <Minimize2 size={24} className="text-purple-400" />
+      ) : (
+        <Maximize2 size={24} className="text-purple-400" />
       )}
-      <button 
-        onMouseEnter={() => setHoverTooltip(t.langTooltip)}
-        onMouseLeave={() => setHoverTooltip(null)}
-        onClick={() => setLang(lang === 'en' ? 'ru' : 'en')} 
-        className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
-      >
-        <Globe size={24} className="text-blue-400" />
-      </button>
-      <button 
-        onMouseEnter={() => setHoverTooltip(t.audioTooltip)}
-        onMouseLeave={() => setHoverTooltip(null)}
-        onClick={() => setIsMuted(!isMuted)} 
-        className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
-      >
-        {isMuted ? <VolumeX className="text-red-400" /> : <Volume2 className="text-game-accent" />}
-      </button>
-    </div>
-  );
-
+    </button>
+    
+    {/* Language Toggle Button */}
+    <button 
+      onMouseEnter={() => setHoverTooltip(t.langTooltip)}
+      onMouseLeave={() => setHoverTooltip(null)}
+      onClick={() => setLang(lang === 'en' ? 'ru' : 'en')} 
+      className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
+    >
+      <Globe size={24} className="text-blue-400" />
+    </button>
+    
+    {/* Audio Toggle Button */}
+    <button 
+      onMouseEnter={() => setHoverTooltip(t.audioTooltip)}
+      onMouseLeave={() => setHoverTooltip(null)}
+      onClick={() => setIsMuted(!isMuted)} 
+      className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
+    >
+      {isMuted ? <VolumeX className="text-red-400" /> : <Volume2 className="text-game-accent" />}
+    </button>
+  </div>
+);
   const HintSymbolsRow = ({ state }: { state: HintsState }) => (
     <div className="flex gap-4 items-center">
       <Scissors size={24} className={state.fiftyFifty ? 'text-indigo-400 drop-shadow-[0_0_5px_rgba(129,140,248,0.5)]' : 'text-slate-600 opacity-20 grayscale'} />
@@ -781,7 +835,7 @@ useEffect(() => {
             })}
         </div>
         {phase === GamePhase.EXTRA_INFO && (
-            <div className="fixed inset-0 z-[400] bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[400] bg-black/1 backdrop-blur-md flex items-center justify-center p-4">
                 <div className="bg-slate-900 border-2 border-green-500 rounded-3xl p-8 max-w-3xl w-full shadow-2xl flex flex-col items-center">
                     <h3 className="text-5xl font-black text-green-400 mb-8 flex items-center gap-6">✓ {t.correct}</h3>
                     <div className="w-full flex flex-col gap-8 overflow-y-auto max-h-[65vh] px-4 custom-scrollbar">
