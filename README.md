@@ -75,3 +75,14 @@ npm cache clean --force
 npm pkg delete overrides
 npm install
 ```
+
+for netlify:
+
+Build command: npm run build
+
+Publish directory: dist
+
+
+
+ffmpeg -i nadezhda-kadysheva-techet-ruchey-minus.mp3 -vn -acodec copy -ss 00:00:50 -to 00:02:00 nadezhda-kadysheva-techet-ruchey-minus_cut.mp3
+
