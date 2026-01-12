@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { GamePhase, GameMode, Language, HintsState, QuestionData } from './types';
 import { SOUNDS } from './constants';
@@ -151,19 +150,10 @@ export default function App() {
   const [customQuestions, setCustomQuestions] = useState<QuestionData[] | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
- /* const questions = useMemo(() => {
-    const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
-    return [...rawSet].sort((a, b) => {
-      if (a.topic === b.topic) return a.id - b.id;
-      return a.topic.localeCompare(b.topic);
-    });
-  }, [lang, customQuestions]);*/
-  
   const questions = useMemo(() => {
-  const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
-  // Return as-is, no sorting
-  return [...rawSet];
-}, [lang, customQuestions]);
+    const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
+    return [...rawSet];
+  }, [lang, customQuestions]);
 
   const availableTopics = useMemo(() => {
     const topicOrder: string[] = [];
@@ -190,6 +180,20 @@ export default function App() {
   const attemptsCount = currentHistory.attempts;
   const currentQuestion = questions[currentQIndex];
 
+  // Helper function to get current question position in topic
+  const getCurrentQuestionPositionInTopic = () => {
+    if (!currentQuestion) return { current: 1, total: 1 };
+    
+    const currentTopic = currentQuestion.topic;
+    const topicQuestions = questions.filter(q => q.topic === currentTopic);
+    const currentQuestionIndexInTopic = topicQuestions.findIndex(q => q.id === currentQuestion.id);
+    
+    return {
+      current: currentQuestionIndexInTopic + 1,
+      total: topicQuestions.length
+    };
+  };
+
   const isTopicCompleted = (topicId: string) => {
     const topicQuestionsIndices = questions
       .map((q, idx) => (q.topic === topicId ? idx : -1))
@@ -197,9 +201,87 @@ export default function App() {
     return topicQuestionsIndices.length > 0 && topicQuestionsIndices.every(idx => history[idx]?.isCorrect);
   };
 
+  // Function to get topic question counts
+  const getTopicQuestionCounts = (topicId: string) => {
+    const topicQuestions = questions.filter(q => q.topic === topicId);
+    const answeredCount = topicQuestions.reduce((count, q) => {
+      const questionIndex = questions.findIndex(q2 => q2.id === q.id && q2.topic === q.topic);
+      return count + (history[questionIndex]?.isCorrect ? 1 : 0);
+    }, 0);
+    
+    return {
+      total: topicQuestions.length,
+      answered: answeredCount,
+      completed: answeredCount === topicQuestions.length && topicQuestions.length > 0
+    };
+  };
+
   useEffect(() => {
     setGlobalMute(isMuted);
   }, [isMuted]);
+
+  // Handle scoreboard music for both modal and full-screen scoreboard
+  useEffect(() => {
+    const shouldPlayWinMusic = showScoreModal || phase === GamePhase.SCOREBOARD;
+    
+    if (shouldPlayWinMusic) {
+      stopAll();
+      playBGM(SOUNDS.WIN, false);
+    } else if (phase !== GamePhase.GAME_OVER && phase !== GamePhase.SCOREBOARD) {
+      // When closing scoreboard or leaving scoreboard phase, restore appropriate music
+      stopAll();
+      if (phase === GamePhase.TOPICS_MENU || phase === GamePhase.TOPIC_INTRO) {
+        playBGM(SOUNDS.TOPIC, true);
+      } else if (phase === GamePhase.QUESTION && currentQuestion?.sound) {
+        playBGM(currentQuestion.sound, false);
+      } else if (phase === GamePhase.EXTRA_INFO) {
+        // EXTRA_INFO phase doesn't have background music
+      }
+    }
+    
+    return () => {
+      if (shouldPlayWinMusic) {
+        stopAll();
+      }
+    };
+  }, [showScoreModal, phase, currentQuestion]);
+
+  // Fixed audio management effect for game phases
+  useEffect(() => {
+    // Don't interfere if scoreboard modal is open or we're in SCOREBOARD phase
+    if (showScoreModal || phase === GamePhase.SCOREBOARD) return;
+    
+    // Clean up any previous audio
+    stopBGM();
+    
+    switch (phase) {
+      case GamePhase.TOPICS_MENU:
+      case GamePhase.TOPIC_INTRO:
+        playBGM(SOUNDS.TOPIC, true);
+        break;
+        
+      case GamePhase.QUESTION:
+        if (currentQuestion?.sound) {
+          playBGM(currentQuestion.sound, false);
+        }
+        break;
+        
+      case GamePhase.GAME_OVER:
+        // Already handled elsewhere
+        break;
+        
+      default:
+        // No BGM for other phases
+        break;
+    }
+    
+    return () => {
+      // Cleanup when component unmounts or phase changes
+      if (phase === GamePhase.QUESTION && currentQuestion?.sound) {
+        stopBGM();
+      }
+    };
+  }, [phase, currentQIndex, showScoreModal, currentQuestion]);
 
   const getActiveTeam = () => {
     if (mode === GameMode.SINGLE_PLAYER) return 1;
@@ -290,27 +372,27 @@ export default function App() {
     stopBGM(); 
     setCallFriendActive(false);
     setIsTimerRunning(false);
-    if (currentQuestion.sound) playBGM(currentQuestion.sound, false);
+    // Restore question sound if we're still in question phase and scoreboard isn't open
+    if (phase === GamePhase.QUESTION && currentQuestion?.sound && !showScoreModal && phase !== GamePhase.SCOREBOARD) {
+      playBGM(currentQuestion.sound, false);
+    }
   };
   
-  
   const toggleFullscreen = () => {
-  if (!document.fullscreenElement) {
-    // Enter fullscreen
-    document.documentElement.requestFullscreen().then(() => {
-      setIsFullscreen(true);
-    }).catch(err => {
-      console.error(`Error attempting to enable fullscreen: ${err.message}`);
-    });
-  } else {
-    // Exit fullscreen
-    if (document.exitFullscreen) {
-      document.exitFullscreen().then(() => {
-        setIsFullscreen(false);
-	      });
-	    }
-	  }
-	};
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          setIsFullscreen(false);
+        });
+      }
+    }
+  };
 
   const handleStartGame = () => {
     stopAll();
@@ -320,97 +402,79 @@ export default function App() {
     setHistory({});
     setCurrentQIndex(0);
     setPhase(GamePhase.TOPICS_MENU);
-    playBGM(SOUNDS.TOPIC, true);
   };
 
   const handleSelectTopic = (topicId: string) => {
-    stopBGM(); 
     const idx = questions.findIndex(q => q.topic === topicId);
     setCurrentQIndex(idx);
     setPhase(GamePhase.TOPIC_INTRO);
   };
 
-  const handleAnswer = (option: string) => {
-    if (isCorrect || wrongAnswers.includes(option) || callFriendActive || pendingHint) return;
-    const activeTeam = getActiveTeam();
-    const isAnswerCorrect = option === currentQuestion.right_answer;
+ const handleAnswer = (option: string) => {
+  if (isCorrect || wrongAnswers.includes(option) || callFriendActive || pendingHint) return;
+  const activeTeam = getActiveTeam();
+  const isAnswerCorrect = option === currentQuestion.right_answer;
 
-    if (isAnswerCorrect) {
-      stopBGM();
+  if (isAnswerCorrect) {
+    // Stop BGM first
+    stopBGM();
+    
+    // Small delay to ensure BGM stops before playing SFX
+    setTimeout(() => {
       playSFX(currentQuestion.correct_sound || SOUNDS.CORRECT);
-      const points = calculatePoints();
-      if (!scoredIndices.includes(currentQIndex)) {
-        setScores(prev => ({
-          ...prev,
-          [activeTeam === 1 ? 'p1' : 'p2']: prev[activeTeam === 1 ? 'p1' : 'p2'] + points
-        }));
-        setScoredIndices(prev => [...prev, currentQIndex]);
-      }
+    }, 50);
+    
+    const points = calculatePoints();
+    if (!scoredIndices.includes(currentQIndex)) {
+      setScores(prev => ({
+        ...prev,
+        [activeTeam === 1 ? 'p1' : 'p2']: prev[activeTeam === 1 ? 'p1' : 'p2'] + points
+      }));
+      setScoredIndices(prev => [...prev, currentQIndex]);
+    }
+    setHistory(prev => ({
+      ...prev,
+      [currentQIndex]: { ...currentHistory, isCorrect: true }
+    }));
+    setPhase(GamePhase.EXTRA_INFO);
+  } else {
+    // For wrong answers, play the wrong sound
+    playSFX(currentQuestion.wrong_sound || SOUNDS.WRONG);
+    if (freeMistakeActive) {
+      setFreeMistakeActive(false);
       setHistory(prev => ({
         ...prev,
-        [currentQIndex]: { ...currentHistory, isCorrect: true }
+        [currentQIndex]: { 
+          ...currentHistory, 
+          wrong: [...currentHistory.wrong, option],
+          attempts: currentHistory.attempts + 1,
+          freeMistakeWasUsedOn: [...currentHistory.freeMistakeWasUsedOn, currentHistory.attempts]
+        }
       }));
-      setPhase(GamePhase.EXTRA_INFO);
     } else {
-      playSFX(currentQuestion.wrong_sound || SOUNDS.WRONG);
-      if (freeMistakeActive) {
-        setFreeMistakeActive(false);
-        setHistory(prev => ({
-          ...prev,
-          [currentQIndex]: { 
-            ...currentHistory, 
-            wrong: [...currentHistory.wrong, option],
-            attempts: currentHistory.attempts + 1,
-            freeMistakeWasUsedOn: [...currentHistory.freeMistakeWasUsedOn, currentHistory.attempts]
-          }
-        }));
-      } else {
-        setHistory(prev => ({
-          ...prev,
-          [currentQIndex]: {
-            ...currentHistory,
-            wrong: [...currentHistory.wrong, option],
-            attempts: currentHistory.attempts + 1
-          }
-        }));
-      }
+      setHistory(prev => ({
+        ...prev,
+        [currentQIndex]: {
+          ...currentHistory,
+          wrong: [...currentHistory.wrong, option],
+          attempts: currentHistory.attempts + 1
+        }
+      }));
     }
-  };
-    
-//  useEffect(() => {
-  // Play music when topic screen becomes active
- // if (phase === GamePhase.TOPICS_MENU) {
-   // playBGM(SOUNDS.TOPIC, false); // Play once
-    
-    // Return cleanup function to stop music
-    //return () => {
-     // stopBGM();
-    //};
- // }
-//}, [phase]); // This runs every time phase changes
+  }
+};
 
-useEffect(() => {
-  if (phase === GamePhase.TOPICS_MENU || phase === GamePhase.TOPIC_INTRO) {
-    playBGM(SOUNDS.TOPIC, false); // Play once
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
     
     return () => {
-      stopBGM();
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }
-}, [phase]);
-
-useEffect(() => {
-  const handleFullscreenChange = () => {
-    setIsFullscreen(!!document.fullscreenElement);
-  };
-
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
-  
-  return () => {
-    document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  };
-}, []);
-
+  }, []);
 
   const handleNextQuestion = () => {
     stopAll();
@@ -423,7 +487,7 @@ useEffect(() => {
       if (nextQ.topic !== prevQ.topic) setPhase(GamePhase.SCOREBOARD);
       else {
         setPhase(GamePhase.QUESTION);
-        if (nextQ.sound) playBGM(nextQ.sound, false);
+        // The useEffect will handle playing the next question's sound
       }
     } else {
       setPhase(GamePhase.GAME_OVER);
@@ -447,7 +511,6 @@ useEffect(() => {
       }
       if (phase === GamePhase.TOPIC_INTRO && (e.code === 'Space' || e.key === 'Enter')) {
         setPhase(GamePhase.QUESTION);
-        if (currentQuestion.sound) playBGM(currentQuestion.sound, false);
         return;
       }
       if (phase !== GamePhase.QUESTION) return;
@@ -458,60 +521,58 @@ useEffect(() => {
            stopAll();
            setCurrentQIndex(prev => prev - 1);
            setPhase(GamePhase.QUESTION);
-           if (questions[currentQIndex-1].sound) playBGM(questions[currentQIndex-1].sound, false);
+           // The useEffect will handle playing the previous question's sound
       }
       if (e.key === 'F11' || (e.key === 'f' && e.ctrlKey)) {
-	  e.preventDefault(); // Prevent browser's default F11 behavior
-	  toggleFullscreen();
-	}
+        e.preventDefault();
+        toggleFullscreen();
+      }
     };    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [phase, currentQIndex, questions, currentHistory, scoredIndices, callFriendActive, freeMistakeActive, pendingHint, isCorrect, showQuitConfirm, showTopicsConfirm]);
 
-const AudioToggle = () => (
-  <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 items-end">
-    {hoverTooltip && (
-      <div className="bg-black/90 text-white text-[10px] font-bold px-3 py-1 rounded border border-white/20 mb-1 animate-in fade-in slide-in-from-right-2">
-        {hoverTooltip}
-      </div>
-    )}
-    
-    {/* Fullscreen Toggle Button */}
-    <button 
-      onMouseEnter={() => setHoverTooltip(isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")}
-      onMouseLeave={() => setHoverTooltip(null)}
-      onClick={toggleFullscreen} 
-      className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-purple-500 transition-all shadow-xl flex items-center justify-center"
-    >
-      {isFullscreen ? (
-        <Minimize2 size={24} className="text-purple-400" />
-      ) : (
-        <Maximize2 size={24} className="text-purple-400" />
+  const AudioToggle = () => (
+    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 items-end">
+      {hoverTooltip && (
+        <div className="bg-black/90 text-white text-[10px] font-bold px-3 py-1 rounded border border-white/20 mb-1 animate-in fade-in slide-in-from-right-2">
+          {hoverTooltip}
+        </div>
       )}
-    </button>
-    
-    {/* Language Toggle Button */}
-    <button 
-      onMouseEnter={() => setHoverTooltip(t.langTooltip)}
-      onMouseLeave={() => setHoverTooltip(null)}
-      onClick={() => setLang(lang === 'en' ? 'ru' : 'en')} 
-      className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
-    >
-      <Globe size={24} className="text-blue-400" />
-    </button>
-    
-    {/* Audio Toggle Button */}
-    <button 
-      onMouseEnter={() => setHoverTooltip(t.audioTooltip)}
-      onMouseLeave={() => setHoverTooltip(null)}
-      onClick={() => setIsMuted(!isMuted)} 
-      className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
-    >
-      {isMuted ? <VolumeX className="text-red-400" /> : <Volume2 className="text-game-accent" />}
-    </button>
-  </div>
-);
+      
+      <button 
+        onMouseEnter={() => setHoverTooltip(isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen")}
+        onMouseLeave={() => setHoverTooltip(null)}
+        onClick={toggleFullscreen} 
+        className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-purple-500 transition-all shadow-xl flex items-center justify-center"
+      >
+        {isFullscreen ? (
+          <Minimize2 size={24} className="text-purple-400" />
+        ) : (
+          <Maximize2 size={24} className="text-purple-400" />
+        )}
+      </button>
+      
+      <button 
+        onMouseEnter={() => setHoverTooltip(t.langTooltip)}
+        onMouseLeave={() => setHoverTooltip(null)}
+        onClick={() => setLang(lang === 'en' ? 'ru' : 'en')} 
+        className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
+      >
+        <Globe size={24} className="text-blue-400" />
+      </button>
+      
+      <button 
+        onMouseEnter={() => setHoverTooltip(t.audioTooltip)}
+        onMouseLeave={() => setHoverTooltip(null)}
+        onClick={() => setIsMuted(!isMuted)} 
+        className="bg-slate-800 p-4 rounded-full border-2 border-slate-600 hover:border-game-accent transition-all shadow-xl flex items-center justify-center"
+      >
+        {isMuted ? <VolumeX className="text-red-400" /> : <Volume2 className="text-game-accent" />}
+      </button>
+    </div>
+  );
+
   const HintSymbolsRow = ({ state }: { state: HintsState }) => (
     <div className="flex gap-4 items-center">
       <Scissors size={24} className={state.fiftyFifty ? 'text-indigo-400 drop-shadow-[0_0_5px_rgba(129,140,248,0.5)]' : 'text-slate-600 opacity-20 grayscale'} />
@@ -634,50 +695,107 @@ const AudioToggle = () => (
     );
   }
 
-  if (phase === GamePhase.TOPICS_MENU) {
-    return (
-      <div className="min-h-screen bg-game-dark p-8 flex flex-col items-center">
-        <AudioToggle />
-        <NavigationConfirmModal show={showQuitConfirm} title={t.quitTitle} message={t.quitMessage} onConfirm={() => { stopAll(); setPhase(GamePhase.SETUP); setShowQuitConfirm(false); }} onCancel={() => setShowQuitConfirm(false)} />
-        <h1 className="text-4xl font-bold mb-8 text-game-accent flex items-center gap-3"><LayoutGrid size={32} /> {t.chooseCategory}</h1>
-        <div className="mb-10 w-full max-w-5xl flex flex-col md:flex-row justify-center gap-4">
-          <Button onClick={() => { stopBGM(); setCurrentQIndex(0); setPhase(GamePhase.TOPIC_INTRO); }} className="px-12 text-xl flex items-center justify-center gap-3"><Play size={24} /> {t.startInOrder}</Button>
-          <Button variant="secondary" onClick={() => setShowScoreModal(true)}><BarChart3 size={20} className="inline mr-2"/> {t.showScore}</Button>
+ if (phase === GamePhase.TOPICS_MENU) {
+  return (
+    <div className="min-h-screen bg-game-dark p-8 flex flex-col items-center">
+      <AudioToggle />
+      <NavigationConfirmModal show={showQuitConfirm} title={t.quitTitle} message={t.quitMessage} onConfirm={() => { stopAll(); setPhase(GamePhase.SETUP); setShowQuitConfirm(false); }} onCancel={() => setShowQuitConfirm(false)} />
+      <h1 className="text-4xl font-bold mb-6 text-game-accent flex items-center gap-3"><LayoutGrid size={32} /> {t.chooseCategory}</h1>
+      
+      {/* Compact Player Hint Status */}
+      <div className="flex justify-center items-center gap-8 mb-10">
+        {/* Player 1 */}
+        <div className="flex items-center gap-4 bg-slate-800/70 px-6 py-3 rounded-xl border border-indigo-500/20">
+          <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest min-w-[80px]">{team1Name}</span>
+          <div className="flex gap-3">
+            <Scissors size={20} className={playerHints.p1.fiftyFifty ? 'text-indigo-400' : 'text-slate-600 opacity-30'} />
+            <Phone size={20} className={playerHints.p1.callFriend ? 'text-blue-400' : 'text-slate-600 opacity-30'} />
+            <ShieldCheck size={20} className={playerHints.p1.freeMistake ? 'text-green-400' : 'text-slate-600 opacity-30'} />
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
-          {availableTopics.map((topic) => {
-            const completed = isTopicCompleted(topic.id);
-            return (
-              <button key={topic.id} onClick={() => handleSelectTopic(topic.id)} className={`p-8 rounded-2xl border-2 transition-all text-left group ${completed ? 'bg-slate-900 border-slate-800' : 'bg-slate-800 hover:border-game-accent'}`}>
-                <div className="flex justify-between items-start">
-                  <h3 className={`text-2xl font-bold ${completed ? 'text-slate-600' : 'text-white'}`}>{topic.name}</h3>
-                  {completed && <CheckCircle2 className="text-green-600" size={24} />}
-                </div>
-                <p className={`mt-2 text-sm uppercase ${completed ? 'text-slate-700' : 'text-slate-400'}`}>{completed ? t.completed : t.startQuiz}</p>
-              </button>
-            );
-          })}
-        </div>
-        <Button variant="secondary" className="mt-12" onClick={() => setShowQuitConfirm(true)}>{t.backToSetup}</Button>
-        {showScoreModal && (
-          <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4" onClick={() => setShowScoreModal(false)}>
-            <div className="bg-slate-900 border-2 border-game-accent/50 p-12 rounded-[3rem] max-w-5xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-               <h3 className="text-4xl font-black mb-12 text-center text-game-accent">{t.currentScoreboard}</h3>
-               <ScoreBoard />
-               <Button onClick={() => setShowScoreModal(false)} className="w-full mt-12 h-16 text-xl">{t.continue}</Button>
+        
+        {/* Player 2 (only in TWO_PLAYER mode) */}
+        {mode === GameMode.TWO_PLAYER && (
+          <div className="flex items-center gap-4 bg-slate-800/70 px-6 py-3 rounded-xl border border-indigo-500/20">
+            <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest min-w-[80px]">{team2Name}</span>
+            <div className="flex gap-3">
+              <Scissors size={20} className={playerHints.p2.fiftyFifty ? 'text-indigo-400' : 'text-slate-600 opacity-30'} />
+              <Phone size={20} className={playerHints.p2.callFriend ? 'text-blue-400' : 'text-slate-600 opacity-30'} />
+              <ShieldCheck size={20} className={playerHints.p2.freeMistake ? 'text-green-400' : 'text-slate-600 opacity-30'} />
             </div>
           </div>
         )}
       </div>
-    );
-  }
+      
+      <div className="mb-10 w-full max-w-5xl flex flex-col md:flex-row justify-center gap-4">
+        <Button onClick={() => { setCurrentQIndex(0); setPhase(GamePhase.TOPIC_INTRO); }} className="px-12 text-xl flex items-center justify-center gap-3"><Play size={24} /> {t.startInOrder}</Button>
+        <Button variant="secondary" onClick={() => setShowScoreModal(true)}><BarChart3 size={20} className="inline mr-2"/> {t.showScore}</Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+        {availableTopics.map((topic) => {
+          const counts = getTopicQuestionCounts(topic.id);
+          const completed = counts.completed;
+          return (
+            <button 
+              key={topic.id} 
+              onClick={() => handleSelectTopic(topic.id)} 
+              className={`p-8 rounded-2xl border-2 transition-all text-left group ${
+                completed ? 'bg-slate-900 border-slate-800' : 'bg-slate-800 hover:border-game-accent'
+              }`}
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className={`text-2xl font-bold ${completed ? 'text-slate-600' : 'text-white'}`}>
+                    {topic.name}
+                  </h3>
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className={`text-sm font-bold px-3 py-1 rounded-full ${
+                      completed 
+                        ? 'bg-green-900/30 text-green-400' 
+                        : 'bg-slate-700/50 text-slate-300'
+                    }`}>
+                      {counts.answered}/{counts.total}
+                    </span>
+                    <span className={`text-xs uppercase ${completed ? 'text-green-700' : 'text-slate-400'}`}>
+                      {completed ? t.completed : 'questions'}
+                    </span>
+                  </div>
+                </div>
+                {completed && <CheckCircle2 className="text-green-600" size={24} />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      
+      <Button variant="secondary" className="mt-12" onClick={() => setShowQuitConfirm(true)}>{t.backToSetup}</Button>
+      
+      {showScoreModal && (
+        <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4" onClick={() => setShowScoreModal(false)}>
+          <div className="bg-slate-900 border-2 border-game-accent/50 p-12 rounded-[3rem] max-w-5xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+             <h3 className="text-4xl font-black mb-12 text-center text-game-accent">{t.currentScoreboard}</h3>
+             <ScoreBoard />
+             <Button onClick={() => setShowScoreModal(false)} className="w-full mt-12 h-16 text-xl">{t.continue}</Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   if (phase === GamePhase.TOPIC_INTRO) {
+    const topicPos = getCurrentQuestionPositionInTopic();
     return (
-      <div onClick={() => { setPhase(GamePhase.QUESTION); if (currentQuestion.sound) playBGM(currentQuestion.sound, false); }} className="min-h-screen flex flex-col items-center justify-center bg-game-dark cursor-pointer p-4 text-center">
+      <div onClick={() => { setPhase(GamePhase.QUESTION); }} className="min-h-screen flex flex-col items-center justify-center bg-game-dark cursor-pointer p-4 text-center">
         <AudioToggle />
         <h2 className="text-2xl text-indigo-300 uppercase tracking-widest mb-4">{t.newCategory}</h2>
         <h1 className="text-6xl md:text-8xl font-black text-white">{currentQuestion.topicName}</h1>
+        <div className="mt-8 text-xl text-slate-300">
+          <span className="bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700">
+            Question {topicPos.current} of {topicPos.total}
+          </span>
+        </div>
         <p className="mt-12 text-slate-400 animate-bounce text-xl">{t.clickToContinue}</p>
       </div>
     );
@@ -713,6 +831,7 @@ const AudioToggle = () => (
   const activeTeamId = getActiveTeam();
   const activeTeamName = activeTeamId === 1 ? team1Name : team2Name;
   const potentialPoints = calculatePoints();
+  const topicPos = getCurrentQuestionPositionInTopic();
 
   return (
     <div className="min-h-screen bg-game-dark flex flex-col relative overflow-hidden">
@@ -721,7 +840,6 @@ const AudioToggle = () => (
       <NavigationConfirmModal show={showQuitConfirm} title={t.quitTitle} message={t.quitMessage} onConfirm={() => { stopAll(); setPhase(GamePhase.SETUP); setShowQuitConfirm(false); }} onCancel={() => setShowQuitConfirm(false)} />
       <NavigationConfirmModal show={showTopicsConfirm} title={t.confirmGoTopics} message={t.confirmGoTopicsMsg} onConfirm={() => { stopAll(); setPhase(GamePhase.TOPICS_MENU); setShowTopicsConfirm(false); }} onCancel={() => setShowTopicsConfirm(false)} />
 
-      {/* CALL FRIEND UI - Pushed to the right side of the screen */}
       {callFriendActive && (
         <div className="fixed top-24 right-8 z-[250] w-full max-w-[320px] pointer-events-auto">
           <div className="bg-slate-900 border-4 border-blue-500 rounded-3xl p-6 text-center flex flex-col items-center shadow-[0_0_50px_rgba(59,130,246,0.4)] animate-in slide-in-from-right duration-300">
@@ -733,11 +851,19 @@ const AudioToggle = () => (
         </div>
       )}
 
-      {/* HEADER */}
       <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-white/5 p-4 px-8 flex justify-between items-center shadow-xl">
         <div className="flex items-center gap-6">
           <button onClick={() => setShowTopicsConfirm(true)} className="text-slate-500 hover:text-indigo-400 transition-colors"><LayoutGrid size={28} /></button>
-          <div className="text-lg font-mono text-gray-400 font-bold">Q{currentQIndex + 1}/{questions.length} <span className="mx-3 text-slate-700">|</span> <span className="text-indigo-400 uppercase tracking-widest">{currentQuestion.topicName}</span></div>
+          <div className="text-lg font-mono text-gray-400 font-bold">
+            Q{currentQIndex + 1}/{questions.length} 
+            <span className="mx-3 text-slate-700">|</span> 
+            <span className="text-indigo-400 uppercase tracking-widest">
+              {currentQuestion.topicName} 
+              <span className="ml-3 text-sm text-slate-300 font-normal">
+                ({topicPos.current}/{topicPos.total})
+              </span>
+            </span>
+          </div>
         </div>
         
         <div className="flex gap-16 relative">
@@ -746,7 +872,6 @@ const AudioToggle = () => (
                     {hoverTooltip}
                 </div>
             )}
-            {/* TEAM 1 HEADER STATUS */}
             <div className={`flex items-center gap-6 ${activeTeamId === 1 ? 'opacity-100' : 'opacity-30'}`}>
                 <div className="flex gap-2">
                     <button 
@@ -773,7 +898,6 @@ const AudioToggle = () => (
                     <span className="text-4xl font-mono text-white font-black">{scores.p1}</span>
                 </div>
             </div>
-            {/* TEAM 2 HEADER STATUS */}
             {mode === GameMode.TWO_PLAYER && (
                 <div className={`flex items-center gap-6 ${activeTeamId === 2 ? 'opacity-100' : 'opacity-30'}`}>
                     <div className="flex flex-col items-center">
@@ -865,4 +989,3 @@ const AudioToggle = () => (
     </div>
   );
 }
-

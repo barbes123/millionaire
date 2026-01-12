@@ -1,10 +1,8 @@
 import { QuestionData } from "./types";
 
-// NOTE: This is the structure requested.
-// In a real scenario, you might replace this with a file upload or fetch.
-
 const SB_URL = "https://zvbgylkmptmqbihcevmu.supabase.co/storage/v1/object/public/";
 
+// NOTE: Ensure SB_URL is defined or imported in this scope
 export const QUESTIONS_EN: QuestionData[] = [
   {
     id: 1,
@@ -35,7 +33,7 @@ export const QUESTIONS_EN: QuestionData[] = [
     right_answer: "C",
     sound: `${SB_URL}sounds/q1_15.mp3`,
     image: "",
-    extra: "The filmmaker was convinced that any miracle works much better outdoors than in studios..."
+    extra: "The filmmaker was convinced that any miracle works much better outdoors than in studios. It's hard to say whether the young GITIS student Inna Churikova, who later became a star of Soviet cinema, shared his confidence, but she stoically endured the cold and selflessly ate the onions that the thrifty props man had put in the basket instead of apples."
   },
   {
     id: 3,
@@ -243,7 +241,7 @@ export const QUESTIONS_EN: QuestionData[] = [
     id: 16,
     topic: "romania",
     topicName: "Romania",
-    question: "Who is the author of the famous painting 'Girl with a Red Kerchief'?",
+    question: "Who is the author of the famous painting 'Girl with a Red Kerchief' (also known as 'Girl with a Scarf')?",
     options: {
       A: "Nicolae Grigorescu",
       B: "Constantin Lecca",
@@ -308,7 +306,7 @@ export const QUESTIONS_EN: QuestionData[] = [
       C: "Nicușor Dan",
       D: "Klaus Iohannis"
     },
-    right_answer: "D",
+    right_answer: "C",
     sound: `${SB_URL}sounds/q1_15.mp3`
   },
   {
@@ -362,7 +360,7 @@ export const QUESTIONS_EN: QuestionData[] = [
       A: "The Moon",
       B: "Pluto",
       C: "The Pacific Ocean",
-      D: "The Death Star"
+      D: "The Death Star from Star Wars"
     },
     right_answer: "B",
     sound: `${SB_URL}sounds/q6_10.mp3`
@@ -380,7 +378,7 @@ export const QUESTIONS_EN: QuestionData[] = [
     },
     right_answer: "C",
     sound: `${SB_URL}sounds/q6_10.mp3`,
-    extra: "The shores of Russia are washed by 13 seas..."
+    extra: "The shores of Russia are washed by 13 seas: The seas of the Atlantic Ocean: the Baltic, Black, and Azov. The seas of the Arctic Ocean: the Barents, White, Kara, Laptev, East Siberian, and Chukchi seas. The seas of the Pacific Ocean: the Bering, Okhotsk, and Japan seas. Enclosed sea (lake): the Caspian."
   },
   {
     id: 26,
@@ -395,7 +393,7 @@ export const QUESTIONS_EN: QuestionData[] = [
     },
     right_answer: "D",
     sound: `${SB_URL}sounds/q6_10.mp3`,
-    extra: "Derbent is considered the oldest city in Russia..."
+    extra: "Derbent is considered the oldest city in Russia, with the first settlements appearing more than 5,000 years ago at the end of the 4th millennium BC, and the first mention of it dating back to the 6th century BC. This city on the shores of the Caspian Sea is not only the oldest, but also one of the oldest Christian centers, and its Naryn-Kala fortress and Juma Mosque are ancient architectural monuments."
   },
   {
     id: 27,
@@ -431,13 +429,13 @@ export const QUESTIONS_EN: QuestionData[] = [
     topicName: "Russia",
     question: "What is \"Raut\"?",
     options: {
-      A: "Assistant cook",
-      B: "Appetizer with champagne",
-      C: "Round in fencing",
-      D: "Evening reception without dancing"
+      A: "Assistant cook in the kitchen",
+      B: "A dish or appetizer served with champagne",
+      C: "A round in fencing",
+      D: "An evening reception without dancing"
     },
     right_answer: "D",
-    extra: "Raut is an evening reception or gathering...",
+    extra: "Raut is an evening reception or gathering, typically without dancing, where people socialize and converse.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
@@ -446,50 +444,50 @@ export const QUESTIONS_EN: QuestionData[] = [
     topicName: "Russia",
     question: "What is a 'Khreptyug'?",
     options: {
-      A: "Linen sack for horse feed",
-      B: "Name of an iron",
-      C: "Troublemaker",
-      D: "Young man for marriage"
+      A: "A linen sack used to hold oats for horse feed",
+      B: "The name of an iron used by serfs to slaughter serfs",
+      C: "A drunkard, \"Troublemaker\"",
+      D: "A young man for marriage in the Volga province"
     },
     right_answer: "A",
-    extra: "Khreptyug is a traditional linen sack used to hold oats...",
+    extra: "Khreptyug is a traditional linen sack used to hold oats for feeding horses.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 31,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "Who commanded the Russian squadron at Chesma?",
+    question: "He commanded the Russian squadron at Chesma.",
     options: {
-      A: "Admiral Ushakov",
+      A: "Admiral Fyodor Ushakov",
       B: "Count Alexei Orlov",
-      C: "Admiral Nakhimov",
-      D: "Admiral Kornilov"
+      C: "Admiral Pavel Nakhimov",
+      D: "Vice Admiral Vladimir Kornilov"
     },
     right_answer: "B",
-    extra: "Count Alexei Grigoryevich Orlov commanded the squadron at Chesma...",
+    extra: "Count Alexei Grigoryevich Orlov commanded the Russian squadron at the Battle of Chesma in 1770 during the Russo-Turkish War.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 32,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "Georges d'Anthès and Charles de Gaulle studied at the same institution. Which one?",
+    question: "Georges Charles de Heeckeren d'Anthès and Charles André Joseph Marie de Gaulle (Dantes and General de Gaulle) studied at different times, but at the same French educational institution. Which one?",
     options: {
       A: "École de Saint-Cyr",
       B: "École Polytechnique",
-      C: "École de Saint-Germain",
-      D: "Sorbonne"
+      C: "École de Saint-Germain-en-Laye",
+      D: "Paris-Sorbonne University"
     },
     right_answer: "A",
-    extra: "École spéciale militaire de Saint-Cyr...",
+    extra: "École spéciale militaire de Saint-Cyr, founded in 1802 by Napoleon. Among Saint-Cyr's graduates are 11 Marshals of France, six members of the Académie française, and three heads of state (MacMahon, Pétain, de Gaulle), as well as the saintly Charles Foucault and Pushkin's murderer, Georges d'Anthès.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 33,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "In which EU city is this monument to Alexander II located?",
+    question: "In which European (EU) city is this monument to Emperor Alexander II located?",
     options: {
       A: "Helsinki, Finland",
       B: "Sofia, Bulgaria",
@@ -498,46 +496,46 @@ export const QUESTIONS_EN: QuestionData[] = [
     },
     right_answer: "A",
     image: `${SB_URL}images/alexander2.png`,
-    extra: "The monument is located on Senate Square in Helsinki...",
+    extra: "The monument to the Grand Duke of Finland and Russian Emperor Alexander II was erected in Helsinki in front of the Helsinki Cathedral on Senate Square. Finland, then part of the Russian state, was declared an autonomous republic and received its own flag, coat of arms, and currency, post office, army, personnel of officials and judges, the first gymnasium, compulsory schooling, and in 1863 a Constitution was introduced, enshrining the rights and foundations of the state system of the Principality of Finland.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 34,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "Who was Count Razumovsky before becoming President of the Academy of Sciences?",
+    question: "Who was Count Kirill Grigorievich Razumovsky before his appointment as President of the Imperial Academy of Sciences in 1746?",
     options: {
-      A: "Minister",
+      A: "Minister of Finance",
       B: "Shepherd",
       C: "Cook",
       D: "Brewer"
     },
     right_answer: "B",
     image: `${SB_URL}images/razumovskiy.png`,
-    extra: "In 1742, Razumovsky lived in a village and herded cattle...",
+    extra: "In 1742, Razumovsky lived in the village of Lemeshi in the Kyiv province and herded cattle. In 1746, at the age of 18, after studying in Europe, he was appointed President of the Imperial Academy of Sciences and remains its youngest and one of its most successful leaders to this day. His appointment is an example of favoritism during the era of palace coups, as he was the brother of Alexei Razumovsky, a favorite of Empress Elizabeth Petrovna. At 22, he was elected Hetman of Little Russia, and at 34, he became a field marshal.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 35,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "Which scientist had honorary doctorates from both Oxford and Cambridge?",
+    question: "Which great Russian scientist was BOTH an honorary doctorate from Oxford and Cambridge universities? (But was not a member of the Russian Academy of Sciences)?",
     options: {
-      A: "Lomonosov",
-      B: "Pavlov",
-      C: "Lobachevsky",
-      D: "Mendeleev"
+      A: "Mikhail Lomonosov",
+      B: "Ivan Pavlov",
+      C: "Nikolai Lobachevsky",
+      D: "Dmitri Mendeleev"
     },
     right_answer: "D",
     image_extra: `${SB_URL}images/mendeleev.png`,
-    extra: "In 1894 Mendeleev was awarded doctorates from both Oxford and Cambridge...",
+    extra: "In 1894, during his trip to England, Dmitri Ivanovich Mendeleev was awarded honorary doctorates from Oxford and Cambridge universities. This is a rare case of one scientist being recognized simultaneously by two of Britain's oldest and most prestigious universities.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 36,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "Neighbors knew Mendeleev as a master craftsman of what?",
+    question: "Dmitri Ivanovich Mendeleev, the neighbors on the street, knew as a master craftsman of what?",
     options: {
       A: "Vodka",
       B: "Boots",
@@ -545,29 +543,29 @@ export const QUESTIONS_EN: QuestionData[] = [
       D: "Suitcases"
     },
     right_answer: "D",
-    extra: "Mendeleev was a passionate and skilled suitcase maker...",
+    extra: "Dmitri Mendeleev was a passionate and skilled suitcase maker. He purchased the materials himself and handcrafted durable and sturdy suitcases, which were highly prized by his contemporaries. For many, he was simply a skilled artisan neighbor, not the author of the Periodic Law.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 37,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "This surgeon reversed a misdiagnosis of tuberculosis for Mendeleyev. Who is he?",
+    question: "This famous Russian surgeon, called the 'father of Russian military field surgery,' was the first to widely use plaster casts to treat fractures. He also reversed the misdiagnosis of tuberculosis made to the young Dmitry Ivanovich Mendeleyev. Who is he?",
     options: {
-      A: "Botkin",
-      B: "Pirogov",
-      C: "Sklifosovsky",
-      D: "Pavlov"
+      A: "Sergey Petrovich Botkin",
+      B: "Nikolai Ivanovich Pirogov",
+      C: "Nikolai Vasilyevich Sklifosovsky",
+      D: "Ivan Petrovich Pavlov"
     },
     right_answer: "B",
-    extra: "Nikolai Pirogov is considered the father of military field surgery...",
+    extra: "Nikolai Ivanovich Pirogov is considered the father of Russian military field surgery and was the first to use plaster casts on a large scale. He also examined the young Dmitri Mendeleev and correctly diagnosed that he did not have tuberculosis.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 38,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "In which city did Mendeleev receive his university education?",
+    question: "In which Russian city did the great Russian scientist Dmitri Mendeleev receive his university education?",
     options: {
       A: "Moscow",
       B: "Kazan",
@@ -575,22 +573,22 @@ export const QUESTIONS_EN: QuestionData[] = [
       D: "Novgorod"
     },
     right_answer: "C",
-    extra: "Mendeleev graduated from the institute in Saint Petersburg in 1855...",
+    extra: "Dmitri Mendeleev graduated from the Main Pedagogical Institute in Saint Petersburg in 1855.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 39,
     topic: "rusplus1",
     topicName: "Russia++",
-    question: "Which of these writers did NOT serve in the Ministry of Foreign Affairs?",
+    question: "Which of these great Russian poets and writers did not serve in the Ministry of Foreign Affairs?",
     options: {
-      A: "Pushkin",
-      B: "Tyutchev",
-      C: "Griboyedov",
-      D: "Lermontov"
+      A: "Alexander Sergeevich Pushkin",
+      B: "Fyodor Ivanovich Tyutchev",
+      C: "Alexander Sergeevich Griboyedov",
+      D: "Mikhail Yuryevich Lermontov"
     },
     right_answer: "D",
-    extra: "Lermontov's fate was tied exclusively to military service...",
+    extra: "A.S. Pushkin was enrolled in the Collegium of Foreign Affairs in 1817 after graduating from the Tsarskoye Selo Lyceum. F.I. Tyutchev served in the State Collegium of Foreign Affairs and spent nearly 20 years in the diplomatic service in Germany and Italy. A.S. Griboyedov was a professional diplomat, and his literary work was essentially a hobby. He served in the Russian mission in Persia, where he died tragically. M.Yu. Lermontov, in fact, never served in the diplomatic service. His fate was tied to military service.",
     sound: `${SB_URL}sounds/q12.mp3`
   },
   {
@@ -600,12 +598,12 @@ export const QUESTIONS_EN: QuestionData[] = [
     question: "What are Revision Tales?",
     options: {
       A: "Census forms for tax accounting",
-      B: "Folk stories",
-      C: "Satirical fables",
-      D: "Manuscripts by Gogol"
+      B: "Folk stories about tsarist officials, which Pushkin studied while working on \"The Captain's Daughter\"",
+      C: "An unpublished collection of satirical fables by I. Krylov about officials",
+      D: "Nikolai Gogol's manuscripts that formed the basis for \"The Inspector General\""
     },
     right_answer: "A",
-    extra: "Compilers of revision tales recorded the population for taxes...",
+    extra: "In preparation for the tax reform ordered by Peter the Great, a general census (revision) was conducted. Only men were counted. Based on the census results, in 1722, the \"revision tales\" were compiled, the very same database. Two years later, a new tax was introduced—the poll tax. Every adult male was obliged to pay it to the treasury. And it didn't matter whether he was a serf, a state slave, or belonged to the posad population, that is, lived in the city.",
     sound: `${SB_URL}sounds/q12.mp3`,
     image: `${SB_URL}images/revskazki.png`
   },
@@ -617,33 +615,33 @@ export const QUESTIONS_EN: QuestionData[] = [
     options: {
       A: "Victoria",
       B: "Elizabeth I",
-      C: "Mary I",
+      C: "Mary I (Bloody Mary)",
       D: "Anne"
     },
     right_answer: "A",
-    extra: "Victoria Alexandrina was named after her godfather, Alexander I...",
+    extra: "Queen Victoria Alexandrina, given it at her baptism in honor of her godfather, Russian Emperor Alexander I, and Victoria's mother.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 42,
     topic: "rusplus",
     topicName: "Russia+++",
-    question: "In the 19th century, jam was contraindicated for girls. Why?",
+    question: "According to 19th-century British physicians, jam and baked goods were especially contraindicated for girls from aristocratic families. What \"threat\" did they pose, according to doctors?",
     options: {
-      A: "Obesity",
-      B: "Bad breath",
-      C: "Erotic fantasies",
-      D: "Hysteria"
+      A: "Causing obesity",
+      B: "Tooth decay and bad breath",
+      C: "Causing erotic fantasies",
+      D: "Believed to cause excessive nervousness and hysteria"
     },
     right_answer: "C",
-    extra: "It was believed sweet foods could 'heat the blood'...",
+    extra: "In the Victorian era, there was a direct link between nutrition and \"carnal urges.\" It was believed that sweet foods (like jam and baked goods) could \"heat the blood\" and awaken feelings and fantasies undesirable for a well-bred girl. Sexual repression: Female sexuality in high society of the time was repressed and strictly controlled. Any expression of it was considered vulgar and indecent.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 43,
     topic: "rusplus",
     topicName: "Russia+++",
-    question: "What language did Empress Alexandra Feodorovna speak best?",
+    question: "What language did Victoria Alice Helena Louise Beatrice of Hesse-Darmstadt (or Her Imperial Majesty Empress and Autocrat of All the Russias Alexandra Feodorovna) speak best?",
     options: {
       A: "English",
       B: "German",
@@ -651,7 +649,7 @@ export const QUESTIONS_EN: QuestionData[] = [
       D: "Russian"
     },
     right_answer: "A",
-    extra: "She was raised at the English court by Queen Victoria...",
+    extra: "Alexandra Feodorovna (Princess Alice of Hesse-Darmstadt) spoke English best, as she was raised at the English court by her grandmother Queen Victoria.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
@@ -660,10 +658,10 @@ export const QUESTIONS_EN: QuestionData[] = [
     topicName: "Russia+++",
     question: "In what village was Ivan Susanin born?",
     options: {
-      A: "Samet",
-      B: "Krasnoe",
-      C: "Molvitino",
-      D: "Derevenki"
+      A: "The village of Samet near Kostroma",
+      B: "The village of Krasnoe-na-Gore",
+      C: "The village of Molvitino (now the settlement of Susanino)",
+      D: "The village of Derevenki (near the village of Domnino, Kostroma District)"
     },
     right_answer: "D",
     sound: `${SB_URL}sounds/q11_15.mp3`
@@ -671,8 +669,8 @@ export const QUESTIONS_EN: QuestionData[] = [
   {
     id: 45,
     topic: "rusplus",
-    topicName: "Russia+++",
-    question: "This people calls itself cod-eaters. Who are they?",
+    topicName: "Russia",
+    question: "This people (not nationality) calls itself cod-eaters. Who are we talking about?",
     options: {
       A: "Nivkhs",
       B: "Pomors",
@@ -680,13 +678,13 @@ export const QUESTIONS_EN: QuestionData[] = [
       D: "Karelians"
     },
     right_answer: "B",
-    extra: "Life for the Pomors was built entirely around fishing...",
+    extra: "In general, the entire life of the Pomors was built around fishing, as the lands near the White Sea are significantly inferior to others in terms of agriculture. Moreover, cod is considered the only fish that never gets boring and can be eaten almost every day.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 46,
     topic: "rusplus",
-    topicName: "Russia+++",
+    topicName: "Russia",
     question: "Who are the 'real people'?",
     options: {
       A: "Kalmyks",
@@ -695,29 +693,29 @@ export const QUESTIONS_EN: QuestionData[] = [
       D: "Evens"
     },
     right_answer: "C",
-    extra: "Chukchi translates as 'real people'...",
+    extra: "The Chukchi (translated into Russian as \"real people\") are a small indigenous people. People of the North. Representatives of this ethnic group live in a territory stretching from the Bering Sea to the Indigirka River and from the Arctic Ocean to the Anadyr and Anyuy Rivers.",
     sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 47,
     topic: "rusplus",
     topicName: "Russia+++",
-    question: "Whose fairy tale is the 'The Nutcracker' based on?",
+    question: "Whose fairy tale is the ballet \"The Nutcracker\" based on?",
     options: {
-      A: "Grimm",
-      B: "Andersen",
-      C: "Perrault",
-      D: "Hoffmann"
+      A: "The Brothers Grimm",
+      B: "Hans Christian Andersen",
+      C: "Charles Perrault",
+      D: "Ernst Theodor Amadeus Hoffmann"
     },
     right_answer: "D",
     sound: `${SB_URL}sounds/q11_15.mp3`,
-    extra: "E.T.A. Hoffmann"
+    extra: "Ernst Theodor Amadeus Hoffmann"
   },
   {
     id: 48,
     topic: "rusplus",
     topicName: "Russia+++",
-    question: "In what year did 'The Nutcracker' premiere?",
+    question: "In what year did the ballet \"The Nutcracker\" premiere at the Mariinsky Theater?",
     options: {
       A: "1877",
       B: "1888",
@@ -726,13 +724,13 @@ export const QUESTIONS_EN: QuestionData[] = [
     },
     right_answer: "C",
     sound: `${SB_URL}sounds/q11_15.mp3`,
-    extra: "The premiere took place on December 6, 1892..."
+    extra: "December 6 (18), 1892"
   },
   {
     id: 49,
     topic: "rusplus",
     topicName: "Russia+++",
-    question: "Which country is represented by the 'Chocolate' dance?",
+    question: "Which country is traditionally represented by the \"Chocolate\" dance in the divertissement of Act II?",
     options: {
       A: "Italy",
       B: "France",
@@ -741,13 +739,13 @@ export const QUESTIONS_EN: QuestionData[] = [
     },
     right_answer: "C",
     sound: `${SB_URL}sounds/q11_15.mp3`,
-    extra: "The 'Chocolate' dance represents Spain..."
+    extra: "The \"Chocolate\" dance (Spanish dance) traditionally represents Spain in the divertissement of Act II of The Nutcracker."
   },
   {
     id: 50,
     topic: "rusplus",
     topicName: "Russia+++",
-    question: "What instrument did Tchaikovsky use for the Sugar Plum Fairy?",
+    question: "What unusual musical instrument, sounding like crystal bells, did Tchaikovsky first use in The Nutcracker for the Sugar Plum Fairy theme?",
     options: {
       A: "Vibraphone",
       B: "Celesta",
@@ -764,35 +762,35 @@ export const QUESTIONS_EN: QuestionData[] = [
     topicName: "Physics",
     question: "Who discovered radioactivity?",
     options: {
-      A: "Rutherford",
-      B: "Curie",
-      C: "Becquerel",
-      D: "Chadwick"
+      A: "Ernest Rutherford",
+      B: "Marie Curie",
+      C: "Henri Becquerel",
+      D: "James Chadwick"
     },
     right_answer: "C",
-    extra: "Henri Becquerel discovered radioactivity in 1896...",
+    extra: "Henri Becquerel discovered radioactivity in 1896 when he found that uranium salts emitted radiation that could darken photographic plates.",
     sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 52,
     topic: "nuclear",
     topicName: "Physics",
-    question: "Who proposed the nuclear model of the atom?",
+    question: "Who proposed the theory of the atomic nucleus as a positively charged mass around which electrons revolve?",
     options: {
-      A: "Rutherford",
-      B: "Bohr",
-      C: "Thomson",
-      D: "Einstein"
+      A: "Ernest Rutherford",
+      B: "Niels Bohr",
+      C: "J.J. Thomson",
+      D: "Albert Einstein"
     },
     right_answer: "A",
-    extra: "Ernest Rutherford proposed the model in 1911...",
+    extra: "Ernest Rutherford proposed the nuclear model of the atom in 1911, suggesting that atoms have a small, dense, positively charged nucleus surrounded by orbiting electrons.",
     sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 53,
     topic: "nuclear",
     topicName: "Physics",
-    question: "What element is used in nuclear reactors for a chain reaction?",
+    question: "What is the name of the element used in nuclear reactors to maintain a chain reaction?",
     options: {
       A: "Uranium-235",
       B: "Hydrogen-1",
@@ -800,19 +798,19 @@ export const QUESTIONS_EN: QuestionData[] = [
       D: "Plutonium-239"
     },
     right_answer: "A",
-    extra: "Uranium-235 is used as fuel in most reactors...",
+    extra: "Uranium-235 is used as fuel in most nuclear reactors because its nuclei can split when they capture slow neutrons, sustaining a chain reaction.",
     sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 54,
     topic: "nuclear",
     topicName: "Physics",
-    question: "What caused the expansion of the universe to begin?",
+    question: "What, according to the Big Bang theory, caused the expansion of the universe to begin?",
     options: {
       A: "Singularity",
-      B: "Black holes",
-      C: "Dark matter",
-      D: "Dark energy"
+      B: "Black hole absorption",
+      C: "Dark matter collapse",
+      D: "The influence of dark energy"
     },
     right_answer: "A",
     sound: `${SB_URL}sounds/q13.mp3`
@@ -821,11 +819,11 @@ export const QUESTIONS_EN: QuestionData[] = [
     id: 55,
     topic: "nuclear",
     topicName: "Physics",
-    question: "What is the background radiation that supports the Big Bang?",
+    question: "What is the cosmic microwave background radiation that supports the Big Bang theory?",
     options: {
-      A: "Gravitational",
+      A: "Gravitational waves",
       B: "X-rays",
-      C: "Microwave",
+      C: "Microwave background radiation",
       D: "Radiation pulsations"
     },
     right_answer: "C",
@@ -835,7 +833,7 @@ export const QUESTIONS_EN: QuestionData[] = [
     id: 56,
     topic: "nuclear",
     topicName: "Physics",
-    question: "When did the Big Bang occur?",
+    question: "When did the Big Bang occur, according to modern calculations?",
     options: {
       A: "10 billion years ago",
       B: "13.8 billion years ago",
@@ -851,10 +849,10 @@ export const QUESTIONS_EN: QuestionData[] = [
     topicName: "Physics",
     question: "Who is the author of the theory of relativity?",
     options: {
-      A: "Bohr",
-      B: "Newton",
-      C: "Galilei",
-      D: "Einstein"
+      A: "Niels Bohr",
+      B: "Isaac Newton",
+      C: "Galileo Galilei",
+      D: "Albert Einstein"
     },
     right_answer: "D",
     sound: `${SB_URL}sounds/q13.mp3`
@@ -863,12 +861,12 @@ export const QUESTIONS_EN: QuestionData[] = [
     id: 58,
     topic: "nuclear",
     topicName: "Physics",
-    question: "How does sound frequency change as the source approaches?",
+    question: "How does the frequency of sound waves change as the sound source approaches the observer?",
     options: {
-      A: "Increases",
-      B: "Decreases",
-      C: "Constant",
-      D: "Disappears"
+      A: "The frequency increases",
+      B: "The frequency decreases",
+      C: "The frequency remains constant",
+      D: "Sound disappears"
     },
     right_answer: "A",
     sound: `${SB_URL}sounds/q13.mp3`
@@ -877,12 +875,12 @@ export const QUESTIONS_EN: QuestionData[] = [
     id: 59,
     topic: "nuclear",
     topicName: "Physics",
-    question: "Which statement is a consequence of Hubble's law?",
+    question: "Which of the following statements is a consequence of Hubble's law?",
     options: {
-      A: "Farther galaxies move faster",
-      B: "Closer galaxies move faster",
-      C: "All galaxies same distance",
-      D: "Universe is constant"
+      A: "Galaxies farther from Earth move faster",
+      B: "Galaxies closer to Earth move faster",
+      C: "All galaxies are the same distance from us",
+      D: "The universe remains constant over time"
     },
     right_answer: "A",
     sound: `${SB_URL}sounds/q13.mp3`
@@ -891,12 +889,12 @@ export const QUESTIONS_EN: QuestionData[] = [
     id: 60,
     topic: "nuclear",
     topicName: "Physics",
-    question: "What is the elementary charge of an electron?",
+    question: "What is the significance of the elementary charge of an electron?",
     options: {
-      A: "1.6 × 10⁻¹⁹ C",
-      B: "2.4 × 10⁻¹⁸ C",
-      C: "3.2 × 10⁻¹⁹ C",
-      D: "0 C"
+      A: "1.6 × 10⁻¹⁹ C (coulomb)",
+      B: "2.4 × 10⁻¹⁸ C (coulomb)",
+      C: "3.2 × 10⁻¹⁹ C (coulomb)",
+      D: "0 C (coulomb)"
     },
     right_answer: "A",
     sound: `${SB_URL}sounds/q13.mp3`
