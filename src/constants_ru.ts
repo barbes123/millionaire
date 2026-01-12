@@ -2,8 +2,6 @@ import { QuestionData } from "./types";
 
 const SB_URL = "https://zvbgylkmptmqbihcevmu.supabase.co/storage/v1/object/public/";
 
-// NOTE: This is the structure requested. 
-// In a real scenario, you might replace this with a file upload or fetch.
 export const QUESTIONS_RU: QuestionData[] = [
   {
     id: 1,
@@ -17,7 +15,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Нью-Йорк"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     extra: "Чикаго"
   },
   {
@@ -32,9 +30,9 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Марципанами"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     image: "",
-    extra: "Киносказочник был уверен, что на природе всякое чудо удается гораздо лучше, чем в павильонах. Разделяла ли его уверенность юная студентка ГИТИСа Инна Чурикова, впоследствии ставшая звездой советского кинематографа, сказать трудно, но она стоически переносила холод и самоотверженно ела головки лука, которые положил в корзину вместо яблок экономный реквизитор."
+    extra: "Киносказочник был уверен, что на природе всякое чудо удается гораздо лучше, чем в павильонах..."
   },
   {
     id: 3,
@@ -48,10 +46,10 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Мишурой"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
-  },  
+  },
   {
     id: 4,
     topic: "xmas_movies",
@@ -64,7 +62,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Ничего не дарил"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -80,7 +78,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Заявление об уходе"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -96,7 +94,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "В казаки-разбойники"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -112,7 +110,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "За хорошее кино"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -128,7 +126,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Дед Мороз"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -144,7 +142,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "В НИИ"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -160,7 +158,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Горячими закусками"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
+    sound: `${SB_URL}sounds/q1_15.mp3`,
     correct_sound: "",
     wrong_sound: ""
   },
@@ -177,8 +175,8 @@ export const QUESTIONS_RU: QuestionData[] = [
     },
     right_answer: "B",
     extra: "",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
-    image: "${SB_URL}/images/rom_flag.webp"
+    sound: `${SB_URL}sounds/q1_15.mp3`,
+    image: `${SB_URL}images/rom_flag.webp`
   },
   {
     id: 12,
@@ -192,8 +190,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Газ Этан"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
-    image_extra: "${SB_URL}/images/metan.png"
+    sound: `${SB_URL}sounds/q1_15.mp3`,
+    image_extra: `${SB_URL}images/metan.png`
   },
   {
     id: 13,
@@ -207,7 +205,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Ча-ча-ча"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3"
+    sound: `${SB_URL}sounds/q1_15.mp3`
   },
   {
     id: 14,
@@ -221,8 +219,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Владимир Косма"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
-    image_extra: "${SB_URL}/images/panflute.png"
+    sound: `${SB_URL}sounds/q1_15.mp3`,
+    image_extra: `${SB_URL}images/panflute.png`
   },
   {
     id: 15,
@@ -236,7 +234,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Мирча чел Бэтрын"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q1_15.mp3"
+    sound: `${SB_URL}sounds/q1_15.mp3`
   },
   {
     id: 16,
@@ -250,8 +248,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Николае Тоница"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
-    image: "${SB_URL}/images/red_girl.png"
+    sound: `${SB_URL}sounds/q1_15.mp3`,
+    image: `${SB_URL}images/red_girl.png`
   },
   {
     id: 17,
@@ -265,8 +263,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Марчел Олинеску"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q1_15.mp3",
-    image: "${SB_URL}/images/infinity.png"
+    sound: `${SB_URL}sounds/q1_15.mp3`,
+    image: `${SB_URL}images/infinity.png`
   },
   {
     id: 18,
@@ -280,7 +278,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "1857"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q1_15.mp3"
+    sound: `${SB_URL}sounds/q1_15.mp3`
   },
   {
     id: 19,
@@ -294,7 +292,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Замок Бран"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q1_15.mp3"
+    sound: `${SB_URL}sounds/q1_15.mp3`
   },
   {
     id: 20,
@@ -308,7 +306,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Клаус Йоханнис"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q1_15.mp3"
+    sound: `${SB_URL}sounds/q1_15.mp3`
   },
   {
     id: 21,
@@ -322,7 +320,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Воронеж"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q6_10.mp3"
+    sound: `${SB_URL}sounds/q6_10.mp3`
   },
   {
     id: 22,
@@ -336,7 +334,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Западно-Сибирское болото"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q6_10.mp3"
+    sound: `${SB_URL}sounds/q6_10.mp3`
   },
   {
     id: 23,
@@ -350,7 +348,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "STALKER"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q6_10.mp3"
+    sound: `${SB_URL}sounds/q6_10.mp3`
   },
   {
     id: 24,
@@ -364,7 +362,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Звезда Смерти из Звездных Войн"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q6_10.mp3"
+    sound: `${SB_URL}sounds/q6_10.mp3`
   },
   {
     id: 25,
@@ -378,8 +376,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "20"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q6_10.mp3",
-    extra: "Берега России омывают 13 морей: Моря Атлантического океана: Балтийское, Чёрное, Азовское. Моря Северного Ледовитого океана: Баренцево, Белое, Карское, море Лаптевых, Восточно-Сибирское, Чукотское. Моря Тихого океана: Берингово, Охотское, Японское. Замкнутое море (озеро): Каспийское."
+    sound: `${SB_URL}sounds/q6_10.mp3`,
+    extra: "Берега России омывают 13 морей..."
   },
   {
     id: 26,
@@ -393,8 +391,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Дербент"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q6_10.mp3",
-    extra: "Дербент считается самым древним городом России, с первыми поселениями, возникшими более 5000 лет назад в конце IV тысячелетия до н.э., а первое упоминание о нем датируется VI веком до н.э. Этот город на берегу Каспийского моря является не только самым древним, но и одним из старейших христианских центров, а его крепость Нарын-Кала и Джума-мечеть — древнейшие памятники архитектуры."
+    sound: `${SB_URL}sounds/q6_10.mp3`,
+    extra: "Дербент считается самым древним городом России..."
   },
   {
     id: 27,
@@ -408,7 +406,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "77%"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q6_10.mp3"
+    sound: `${SB_URL}sounds/q6_10.mp3`
   },
   {
     id: 28,
@@ -422,7 +420,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Элиста"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q6_10.mp3"
+    sound: `${SB_URL}sounds/q6_10.mp3`
   },
   {
     id: 29,
@@ -436,8 +434,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Вечерний приём без танцев"
     },
     right_answer: "D",
-    extra: "Раут — вечерний приём гостей, обычно без танцев, с беседами и угощениями.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Раут — вечерний приём гостей...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 30,
@@ -451,8 +449,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Парень на выданье в Волжской губернии"
     },
     right_answer: "A",
-    extra: "Хрептюг — полотняный мешок для овса, который использовался для кормления лошадей.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Хрептюг — полотняный мешок для овса...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 31,
@@ -466,15 +464,15 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Он командовал русской эскадрой при Чесме"
     },
     right_answer: "B",
-    extra: "Жорж Шарль Дантес (Георг Карл де Геккерен) — французский офицер, который на дуэли смертельно ранил Александра Сергеевича Пушкина. После дуэли был лишён чинов и выслан из России.",
-    image_extra: "${SB_URL}/images/dantes.png",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Жорж Шарль Дантес...",
+    image_extra: `${SB_URL}images/dantes.png`,
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 32,
     topic: "rusplus1",
     topicName: "Россия++",
-    question: "Жорж Шарль Дантес и Шарль де Голль учились в разное время, но в одном и том же учебном заведении Франции. В каком?",
+    question: "Жорж Шарль Дантес и Шарль де Голль учились в разное время... В каком?",
     options: {
       A: "École de Saint-Cyr",
       B: "École Polytechnique",
@@ -482,8 +480,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Université Paris-Sorbonne"
     },
     right_answer: "A",
-    extra: "École spéciale militaire de Saint-Cyr, основанная в 1802 г. Наполеоном. Среди выпускников Сен-Сира — 11 маршалов Франции, 6 членов Французской академии и трое глав государства (Мак-Магон, Петен, де Голль), а также святой Шарль Фуко и убийца Пушкина — Жорж Дантес.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    extra: "École spéciale militaire de Saint-Cyr...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 33,
@@ -497,15 +495,15 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Париж, Франция"
     },
     right_answer: "A",
-    image: "${SB_URL}/images/alexander2.png",
-    extra: "Памятник великому князю Финляндскому и российскому императору Александру II установлен в Хельсинки перед Кафедральным собором Хельсинки на Сенатской площади. Финляндия, входившая в состав Российского государства, была объявлена автономной республикой и получила собственные флаг, герб и валюту, почту, армию, кадры чиновников и судей, первую гимназию, обязательное школьное обучение, в 1863 году была введена Конституция, закрепляющая права и основы государственного строя Финского княжества.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    image: `${SB_URL}images/alexander2.png`,
+    extra: "Памятник великому князю Финляндскому...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 34,
     topic: "rusplus1",
     topicName: "Россия++",
-    question: "Кем был граф Кирилл Григорьевич Разумовский до своего назначения президентом Императорской Академии наук в 1746 году?",
+    question: "Кем был граф Кирилл Григорьевич Разумовский... в 1746 году?",
     options: {
       A: "Министром финансов",
       B: "Пастухом",
@@ -513,15 +511,15 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Пивоваром"
     },
     right_answer: "B",
-    image: "${SB_URL}/images/razumovskiy.png",
-    extra: "В 1742 году Разумовский жил в деревне Лемеши Киевской губернии и пас скот. В 1746 году в возрасте 18 лет, после обучения в Европе, назначен президентом Императорской Академии наук и остаётся самым молодым и одним из самых успешных её руководителей по сей день. Его назначение является примером фаворитизма эпохи дворцовых переворотов, так как он был братом Алексея Разумовского — фаворита императрицы Елизаветы Петровны. В 22 года был избран гетманом Малороссии, а в 34 стал фельдмаршалом.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    image: `${SB_URL}images/razumovskiy.png`,
+    extra: "В 1742 году Разумовский жил в деревне Лемеши...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 35,
     topic: "rusplus1",
     topicName: "Россия++",
-    question: "Какой великий русский учёный был ОДНОВРЕМЕННО почётным доктором университетов Оксфорда и Кембриджа? (Но при этом не был членом академии наук в России)?",
+    question: "Какой великий русский учёный был ОДНОВРЕМЕННО почётным доктором университетов Оксфорда и Кембриджа?",
     options: {
       A: "Михаил Ломоносов",
       B: "Иван Павлов",
@@ -529,9 +527,9 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Дмитрий Менделеев"
     },
     right_answer: "D",
-    image_extra: "${SB_URL}/images/mendeleev.png",
-    extra: "В 1894 г. во время своей поездки в Англию Дмитрий Иванович Менделеев был удостоен почётных докторских степеней университетов Оксфорда и Кембриджа. Это редчайший случай, когда один учёный был признан одновременно двумя старейшими и самыми престижными университетами Великобритании.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    image_extra: `${SB_URL}images/mendeleev.png`,
+    extra: "В 1894 г. во время своей поездки в Англию...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 36,
@@ -545,14 +543,14 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Чемоданов"
     },
     right_answer: "D",
-    extra: "Дмитрий Менделеев был страстным и искусным чемоданных дел мастером. Он сам закупал материалы и вручную создавал прочные и добротные чемоданы, которые очень ценились его современниками. Для многих он был просто умелым соседом-ремесленником, а не автором Периодического закона.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    extra: "Дмитрий Менделеев был страстным и искусным чемоданных дел мастером...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 37,
     topic: "rusplus1",
     topicName: "Россия++",
-    question: "Этот знаменитый русский хирург, которого называют «отцом русской военно-полевой хирургии», впервые массово применил гипсовую повязку для лечения переломов. Он же молодому Дмитрию Ивановичу Менделееву отменил поставленный ошибочно диагноз туберкулёза. Кто это?",
+    question: "Этот знаменитый русский хирург... Кто это?",
     options: {
       A: "Сергей Петрович Боткин",
       B: "Николай Иванович Пирогов",
@@ -560,8 +558,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Иван Петрович Павлов"
     },
     right_answer: "B",
-    extra: "Николай Иванович Пирогов — основоположник военно-полевой хирургии, впервые применивший гипсовую повязку. Он также осматривал юного Дмитрия Менделеева и опроверг диагноз туберкулёза.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    extra: "Николай Иванович Пирогов — основоположник военно-полевой хирургии...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 38,
@@ -575,8 +573,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Новгород"
     },
     right_answer: "C",
-    extra: "Дмитрий Иванович Менделеев окончил Главный педагогический институт в Санкт-Петербурге в 1855 году.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    extra: "Дмитрий Иванович Менделеев окончил Главный педагогический институт...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 39,
@@ -590,8 +588,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Михаил Юрьевич Лермонтов"
     },
     right_answer: "D",
-    extra: "А.С. Пушкин был зачислен в Коллегию иностранных дел в 1817 году после окончания Царскосельского лицея. Ф.И. Тютчев служил в Государственной коллегии иностранных дел и почти 20 лет провёл на дипломатической службе в Германии и Италии. А.С. Грибоедов был профессиональным дипломатом, а его литературная деятельность была, по сути, увлечением. Он служил в русской миссии в Персии, где и трагически погиб. М.Ю. Лермонтов действительно никогда не служил в дипломатическом ведомстве. Его судьба была связана с военной службой.",
-    sound: "${SB_URL}/sounds/q12.mp3"
+    extra: "А.С. Пушкин был зачислен в Коллегию иностранных дел...",
+    sound: `${SB_URL}sounds/q12.mp3`
   },
   {
     id: 40,
@@ -600,14 +598,14 @@ export const QUESTIONS_RU: QuestionData[] = [
     question: "Что такое Ревизские сказки?",
     options: {
       A: "Переписные листы податного населения для налогового учёта",
-      B: "Народные истории о царских чиновниках, которые изучал Пушкин при работе над «Капитанской дочкой»",
-      C: "Неопубликованный сборник сатирических басен И.Крылова о чиновниках",
-      D: "Рукописи Николая Гоголя, легшие в основу «Ревизора»"
+      B: "Народные истории о царских чиновниках...",
+      C: "Неопубликованный сборник сатирических басен...",
+      D: "Рукописи Николая Гоголя..."
     },
     right_answer: "A",
-    extra: "При подготовке к налоговой реформе по указу Петра Первого была проведена всеобщая перепись населения (ревизия). Переписывали только мужчин. По итогам переписи в 1722 году составили «ревизские сказки» — базу данных для налогообложения. А через два года ввели новый налог — подушную подать. Ее был обязан платить в казну каждый взрослый мужчина. И неважно, был он крепостным крестьянином, государственным или принадлежал к посадскому населению, то есть жил в городе.",
-    sound: "${SB_URL}/sounds/q12.mp3",
-    image: "${SB_URL}/images/revskazki.png"
+    extra: "При подготовке к налоговой реформе...",
+    sound: `${SB_URL}sounds/q12.mp3`,
+    image: `${SB_URL}images/revskazki.png`
   },
   {
     id: 41,
@@ -621,29 +619,29 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Павел I"
     },
     right_answer: "B",
-    extra: "Королева Виктория-Александрина, ей дали его при крещении в честь крестного, российского императора Александра I, и матери Виктории.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Королева Виктория-Александрина...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 42,
     topic: "rusplus",
     topicName: "Россия+++",
-    question: "Согласно представлениям британских медиков XIX века, варенье и сдобная выпечка были особенно противопоказаны девушкам из аристократических семей. Какую «угрозу» они, по мнению врачей, в себе несли?",
+    question: "Согласно представлениям британских медиков XIX века... Какую «угрозу» они несли?",
     options: {
       A: "Вызывание полноты",
-      B: "Порчу зубов и дурной запах изо рта",
+      B: "Порчу зубов",
       C: "Вызывали эротические фантазии",
-      D: "Считались причиной излишней нервозности и истерии"
+      D: "Причину излишней нервозности"
     },
     right_answer: "C",
-    extra: "В викторианскую эпоху существовала прямая связь между питанием и «плотскими позывами». Считалось, что сладкая пища (как варенье и сдоба) может «разгорячать кровь» и пробуждать нежелательные для благовоспитанной девицы чувства и фантазии. Подавление сексуальности: Женская сексуальность в высшем обществе того времени подавлялась и строго контролировалась. Любое ее проявление считалось вульгарным и неприличным.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "В викторианскую эпоху существовала прямая связь...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 43,
     topic: "rusplus",
     topicName: "Россия+++",
-    question: "На каком языке говорила лучше всего Виктория Алиса Елена Луиза Беатриса Гессен-Дармштадтская (или Её Императорское Величество Императрица и Самодержица Всероссийская Александра Фёдоровна)?",
+    question: "На каком языке говорила лучше всего... Александра Фёдоровна?",
     options: {
       A: "Английском",
       B: "Немецком",
@@ -651,8 +649,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Русском"
     },
     right_answer: "A",
-    extra: "Александра Фёдоровна (принцесса Алиса Гессен-Дармштадтская) лучше всего говорила на английском языке, так как воспитывалась при английском дворе своей бабушкой королевой Викторией.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Александра Фёдоровна лучше всего говорила на английском языке...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 44,
@@ -662,17 +660,17 @@ export const QUESTIONS_RU: QuestionData[] = [
     options: {
       A: "Деревня Саметь под Костромой",
       B: "Село Красное-на-Горе",
-      C: "Село Молвитино (ныне посёлок Сусанино)",
-      D: "Деревня Деревеньки (у села Домнино, Костромской уезд)"
+      C: "Село Молвитино",
+      D: "Деревня Деревеньки"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 45,
     topic: "rusplus",
     topicName: "Россия+++",
-    question: "Этот народ (не национальность) называет себя трескоедом. О ком идет речь?",
+    question: "Этот народ называет себя трескоедом. О ком идет речь?",
     options: {
       A: "Нивхи",
       B: "Поморы",
@@ -680,8 +678,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Карелы"
     },
     right_answer: "B",
-    extra: "Вообще вся жизнь поморов строилась именно вокруг рыбного промысла, так как земли возле Белого моря в значительной степени уступают другим с точки зрения ведения сельского хозяйства. К тому же треска считается единственным видом рыб, который не приедается и ее можно есть практически каждый день.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Вообще вся жизнь поморов строилась именно вокруг рыбного промысла...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 46,
@@ -695,8 +693,8 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Эвены"
     },
     right_answer: "C",
-    extra: "Чукчи (в переводе на русский язык «настоящие люди») – малочисленный коренной народ Севера. Проживают представители этого этноса на территории, растянувшейся от Берингова моря до реки Индигирки и от Северного Ледовитого океана до рек Анадырь и Анюй.",
-    sound: "${SB_URL}/sounds/q11_15.mp3"
+    extra: "Чукчи (в переводе на русский язык «настоящие люди»)...",
+    sound: `${SB_URL}sounds/q11_15.mp3`
   },
   {
     id: 47,
@@ -710,7 +708,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Эрнста Теодора Амадея Гофмана"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q11_15.mp3",
+    sound: `${SB_URL}sounds/q11_15.mp3`,
     extra: "Эрнст Теодор Амадей Гофман"
   },
   {
@@ -725,14 +723,14 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "1898"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q11_15.mp3",
+    sound: `${SB_URL}sounds/q11_15.mp3`,
     extra: "6 (18) декабря 1892 года"
   },
   {
     id: 49,
     topic: "rusplus",
     topicName: "Россия+++",
-    question: "Какая страна традиционно «представлена» танцем «Шоколад» в дивертисменте второго акта балета «Щелкунчик»?",
+    question: "Какая страна традиционно «представлена» танцем «Шоколад»?",
     options: {
       A: "Италия",
       B: "Франция",
@@ -740,14 +738,14 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Англия"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q11_15.mp3",
-    extra: "Танец «Шоколад» (испанский танец) представляет Испанию в дивертисменте второго акта."
+    sound: `${SB_URL}sounds/q11_15.mp3`,
+    extra: "Танец «Шоколад» (испанский танец)..."
   },
   {
     id: 50,
     topic: "rusplus",
     topicName: "Россия+++",
-    question: "Какой необычный музыкальный инструмент, звучащий как хрустальные колокольчики, Чайковский впервые использовал в «Щелкунчике» для темы Феи Драже?",
+    question: "Какой необычный музыкальный инструмент... Чайковский впервые использовал в «Щелкунчике»?",
     options: {
       A: "Вибрафон",
       B: "Челеста",
@@ -755,7 +753,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Ксилофон"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q11_15.mp3",
+    sound: `${SB_URL}sounds/q11_15.mp3`,
     extra: "Челеста"
   },
   {
@@ -770,14 +768,14 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Джеймс Чедвик"
     },
     right_answer: "C",
-    extra: "Анри Беккерель открыл явление радиоактивности в 1896 году, обнаружив, что соли урана испускают излучение, засвечивающее фотопластинки.",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    extra: "Анри Беккерель открыл явление радиоактивности в 1896 году...",
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 52,
     topic: "nuclear",
     topicName: "Физика",
-    question: "Кто предложил теорию атомного ядра как положительно заряженную массу, вокруг которой обращаются электроны?",
+    question: "Кто предложил теорию атомного ядра как положительно заряженную массу...?",
     options: {
       A: "Эрнест Резерфорд",
       B: "Нильс Бор",
@@ -785,14 +783,14 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Альберт Эйнштейн"
     },
     right_answer: "A",
-    extra: "Эрнест Резерфорд предложил планетарную модель атома в 1911 году, согласно которой атом состоит из положительно заряженного ядра и вращающихся вокруг него электронов.",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    extra: "Эрнест Резерфорд предложил планетарную модель атома...",
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 53,
     topic: "nuclear",
     topicName: "Физика",
-    question: "Как называется элемент, который используется в ядерных реакторах для поддержания цепной реакции?",
+    question: "Как называется элемент, который используется в ядерных реакторах...?",
     options: {
       A: "Уран-235",
       B: "Водород-1",
@@ -800,14 +798,14 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Плутоний-239"
     },
     right_answer: "A",
-    extra: "Уран-235 используется в качестве топлива в большинстве ядерных реакторов, так как его ядра способны делиться при захвате медленных нейтронов, поддерживая цепную реакцию.",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    extra: "Уран-235 используется в качестве топлива...",
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 54,
     topic: "nuclear",
     topicName: "Физика",
-    question: "Что, согласно теории большого взрыва, было причиной начала расширения Вселенной?",
+    question: "Что... было причиной начала расширения Вселенной?",
     options: {
       A: "Сингулярность",
       B: "Поглощение черными дырами",
@@ -815,13 +813,13 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Влияние темной энергии"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 55,
     topic: "nuclear",
     topicName: "Физика",
-    question: "Что такое космическое микроволновое фоновое излучение, которое подтверждает теорию большого взрыва?",
+    question: "Что такое космическое микроволновое фоновое излучение...?",
     options: {
       A: "Гравитационные волны",
       B: "Рентгеновское излучение",
@@ -829,13 +827,13 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Пульсации излучения"
     },
     right_answer: "C",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 56,
     topic: "nuclear",
     topicName: "Физика",
-    question: "Когда произошел Большой взрыв, согласно современным расчетам?",
+    question: "Когда произошел Большой взрыв...?",
     options: {
       A: "10 миллиардов лет назад",
       B: "13 миллиардов лет назад",
@@ -843,7 +841,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "20 миллиардов лет назад"
     },
     right_answer: "B",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 57,
@@ -857,13 +855,13 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Альберт Эйнштейн"
     },
     right_answer: "D",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 58,
     topic: "nuclear",
     topicName: "Физика",
-    question: "Как меняется частота звуковых волн, если источник звука приближается к наблюдателю?",
+    question: "Как меняется частота звуковых волн, если источник звука приближается?",
     options: {
       A: "Частота увеличивается",
       B: "Частота уменьшается",
@@ -871,7 +869,7 @@ export const QUESTIONS_RU: QuestionData[] = [
       D: "Звук исчезает"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 59,
@@ -879,13 +877,13 @@ export const QUESTIONS_RU: QuestionData[] = [
     topicName: "Физика",
     question: "Какое из утверждений является следствием закона Хаббла?",
     options: {
-      A: "Галактики с большей удаленностью от Земли движутся быстрее.",
-      B: "Галактики с меньшей удаленностью от Земли движутся быстрее",
-      C: "Все галактики находятся на одинаковом расстоянии от нас",
-      D: "Вселенная остаётся неизменной в масштабе времени"
+      A: "Галактики с большей удаленностью движутся быстрее",
+      B: "Галактики с меньшей удаленностью движутся быстрее",
+      C: "Все галактики на одном расстоянии",
+      D: "Вселенная остаётся неизменной"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   },
   {
     id: 60,
@@ -893,12 +891,12 @@ export const QUESTIONS_RU: QuestionData[] = [
     topicName: "Физика",
     question: "Какое значение имеет элементарный заряд электрона?",
     options: {
-      A: "1.6 × 10⁻¹⁹ Кл (кулон)",
-      B: "2.4 × 10⁻¹⁸ Кл (кулон)",
-      C: "3.2 × 10⁻¹⁹ Кл (кулон)",
-      D: "0 Кл (кулон)"
+      A: "1.6 × 10⁻¹⁹ Кл",
+      B: "2.4 × 10⁻¹⁸ Кл",
+      C: "3.2 × 10⁻¹⁹ Кл",
+      D: "0 Кл"
     },
     right_answer: "A",
-    sound: "${SB_URL}/sounds/q13.mp3"
+    sound: `${SB_URL}sounds/q13.mp3`
   }
 ];
