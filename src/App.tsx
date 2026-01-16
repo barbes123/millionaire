@@ -18,6 +18,8 @@ interface QuestionHistory {
   isCorrect: boolean;
   attempts: number;
   freeMistakeWasUsedOn: number[]; // Tracks attempt indices that were protected
+  usedFiftyFifty?: boolean; // Add this to track if 50/50 was used
+  fiftyFiftyFailed?: boolean; // Add this to track if 50/50 failed (wrong answer after using it)
 }
 
 const translations = {
@@ -298,6 +300,10 @@ export default function App() {
   };
 
   const calculatePoints = () => {
+    // Check if 50/50 was used and failed (wrong answer given after using it)
+    if (currentHistory.fiftyFiftyFailed) {
+      return 0; // Zero points if 50/50 was used and failed
+    }
     if (attemptsCount === 0) return 3;
     if (attemptsCount === 1) return 2;
     if (attemptsCount === 2) return 1;
@@ -328,7 +334,9 @@ export default function App() {
     const toHide = wrongs.sort(() => 0.5 - Math.random()).slice(0, 2);
     setHistory(prev => ({
       ...prev,
-      [currentQIndex]: { ...currentHistory, wrong: [...currentHistory.wrong, ...toHide] }
+      [currentQIndex]: { ...currentHistory, wrong: [...currentHistory.wrong, ...toHide],
+          usedFiftyFifty: true // Track that 50/50 was used
+       }
     }));
     setPlayerHints(prev => ({ ...prev, [team === 1 ? 'p1' : 'p2']: { ...hints, fiftyFifty: false } }));
   };
@@ -440,6 +448,7 @@ export default function App() {
   } else {
     // For wrong answers, play the wrong sound
     playSFX(currentQuestion.wrong_sound || SOUNDS.WRONG);
+    const wasFiftyFiftyUsed = currentHistory.usedFiftyFifty;
     if (freeMistakeActive) {
       setFreeMistakeActive(false);
       setHistory(prev => ({
@@ -448,7 +457,9 @@ export default function App() {
           ...currentHistory, 
           wrong: [...currentHistory.wrong, option],
           attempts: currentHistory.attempts + 1,
-          freeMistakeWasUsedOn: [...currentHistory.freeMistakeWasUsedOn, currentHistory.attempts]
+          freeMistakeWasUsedOn: [...currentHistory.freeMistakeWasUsedOn, currentHistory.attempts],
+          // Only mark as fiftyFiftyFailed if free mistake wasn't active
+          fiftyFiftyFailed: wasFiftyFiftyUsed && !freeMistakeActive
         }
       }));
     } else {
@@ -457,7 +468,8 @@ export default function App() {
         [currentQIndex]: {
           ...currentHistory,
           wrong: [...currentHistory.wrong, option],
-          attempts: currentHistory.attempts + 1
+          attempts: currentHistory.attempts + 1,
+          fiftyFiftyFailed: wasFiftyFiftyUsed
         }
       }));
     }
