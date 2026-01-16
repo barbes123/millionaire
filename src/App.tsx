@@ -59,7 +59,7 @@ const translations = {
     hint5050: "50/50",
     hintCall: "Phone Call",
     hintMistake: "Safe Bet",
-    loadQuestions: "Load JSON",
+    // loadQuestions: "Load JSON",
     done: "Finish",
     langTooltip: "Change language (EN/RU)",
     audioTooltip: "Toggle sound on/off",
@@ -151,9 +151,9 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const questions = useMemo(() => {
-    const rawSet = customQuestions ? customQuestions : (lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU);
-    return [...rawSet];
-  }, [lang, customQuestions]);
+    // Always use language-based questions, ignore customQuestions
+    return [...(lang === 'en' ? QUESTIONS_EN : QUESTIONS_RU)];
+  }, [lang]);
 
   const availableTopics = useMemo(() => {
     const topicOrder: string[] = [];
@@ -671,7 +671,7 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="bg-slate-900/50 p-4 rounded-xl border border-dashed border-slate-600 text-center">
+            {/* <div className="bg-slate-900/50 p-4 rounded-xl border border-dashed border-slate-600 text-center">
               <label className="cursor-pointer text-sm text-indigo-400 hover:text-indigo-300 flex flex-col items-center gap-2">
                 <Upload size={20} />{t.loadQuestions}<input type="file" className="hidden" accept=".json" onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -687,7 +687,7 @@ export default function App() {
                   reader.readAsText(file);
                 }} />
               </label>
-            </div>
+            </div> */}
             <Button onClick={handleStartGame} className="w-full text-lg mt-4">{t.startGame}</Button>
           </div>
         </div>
