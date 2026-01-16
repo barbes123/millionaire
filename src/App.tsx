@@ -20,7 +20,8 @@ interface QuestionHistory {
   freeMistakeWasUsedOn: number[]; // Tracks attempt indices that were protected
   usedFiftyFifty?: boolean; // Add this to track if 50/50 was used
   fiftyFiftyFailed?: boolean; // Add this to track if 50/50 failed (wrong answer after using it)
-}
+  shieldGaveFreshStart?: boolean; // NEW: Track if shield gave fresh start 
+  }
 
 const translations = {
   en: {
@@ -304,6 +305,16 @@ export default function App() {
     if (currentHistory.fiftyFiftyFailed) {
       return 0; // Zero points if 50/50 was used and failed
     }
+
+  // If shield gave a fresh start, calculate from maximum points
+  if (currentHistory.shieldGaveFreshStart) {
+    const attemptsAfterShield = attemptsCount - currentHistory.freeMistakeWasUsedOn.length;
+    if (attemptsAfterShield === 0) return 3;
+    if (attemptsAfterShield === 1) return 2;
+    if (attemptsAfterShield === 2) return 1;
+    return 0;
+  }
+
     if (attemptsCount === 0) return 3;
     if (attemptsCount === 1) return 2;
     if (attemptsCount === 2) return 1;
@@ -459,7 +470,8 @@ export default function App() {
           attempts: currentHistory.attempts + 1,
           freeMistakeWasUsedOn: [...currentHistory.freeMistakeWasUsedOn, currentHistory.attempts],
           // Only mark as fiftyFiftyFailed if free mistake wasn't active
-          fiftyFiftyFailed: wasFiftyFiftyUsed && !freeMistakeActive
+          fiftyFiftyFailed: wasFiftyFiftyUsed && !freeMistakeActive,
+          shieldGaveFreshStart: true
         }
       }));
     } else {
@@ -469,7 +481,8 @@ export default function App() {
           ...currentHistory,
           wrong: [...currentHistory.wrong, option],
           attempts: currentHistory.attempts + 1,
-          fiftyFiftyFailed: wasFiftyFiftyUsed
+          fiftyFiftyFailed: wasFiftyFiftyUsed,
+          shieldGaveFreshStart: false
         }
       }));
     }
